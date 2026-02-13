@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>삼권분립 균형 게임 - 세심이와 함께하는 정부 운영</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow: auto;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 시작 화면 */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            background: linear-gradient(180deg, #3F51B5 0%, #303F9F 50%, #1A237E 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s, visibility 0.5s;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        #start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .game-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            color: #FFF;
+            text-shadow: 3px 3px 0 #1A237E, 5px 5px 0 rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .game-subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+            color: #C5CAE9;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        /* 세심이 캐릭터 */
+        .sesim-character {
+            width: 100px;
+            height: 120px;
+            position: relative;
+            margin: 15px auto;
+            animation: float 2s ease-in-out infinite;
+        }
+        
+        .sesim-character.small {
+            width: 70px;
+            height: 85px;
+            margin: 10px auto;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .sesim-body {
+            width: 85px;
+            height: 85px;
+            background: linear-gradient(180deg, #4A3728 0%, #4A3728 45%, #FFD93D 45%, #FFD93D 100%);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #3D2E1F;
+        }
+        
+        .sesim-character.small .sesim-body {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .sesim-face {
+            width: 60px;
+            height: 42px;
+            background: #FFE4B5;
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .sesim-character.small .sesim-face {
+            width: 42px;
+            height: 30px;
+            top: 8px;
+        }
+        
+        .sesim-eye {
+            width: 7px;
+            height: 9px;
+            background: #2D2D2D;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+        }
+        
+        .sesim-eye.left { left: 15px; }
+        .sesim-eye.right { right: 15px; }
+        
+        .sesim-character.small .sesim-eye {
+            width: 5px;
+            height: 6px;
+            top: 10px;
+        }
+        
+        .sesim-character.small .sesim-eye.left { left: 10px; }
+        .sesim-character.small .sesim-eye.right { right: 10px; }
+        
+        .sesim-mouth {
+            width: 12px;
+            height: 8px;
+            background: #E85A4F;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .sesim-character.small .sesim-mouth {
+            width: 8px;
+            height: 5px;
+            bottom: 7px;
+        }
+        
+        .sesim-cheek {
+            width: 10px;
+            height: 6px;
+            background: #FFB6C1;
+            border-radius: 50%;
+            position: absolute;
+            top: 24px;
+            opacity: 0.7;
+        }
+        
+        .sesim-cheek.left { left: 6px; }
+        .sesim-cheek.right { right: 6px; }
+        
+        .sesim-character.small .sesim-cheek {
+            width: 7px;
+            height: 4px;
+            top: 17px;
+        }
+        
+        .sesim-character.small .sesim-cheek.left { left: 4px; }
+        .sesim-character.small .sesim-cheek.right { right: 4px; }
+        
+        .sesim-antenna {
+            width: 3px;
+            height: 25px;
+            background: #4A3728;
+            position: absolute;
+            top: -20px;
+            border-radius: 2px;
+        }
+        
+        .sesim-antenna.left { left: 30px; transform: rotate(-15deg); }
+        .sesim-antenna.right { right: 30px; transform: rotate(15deg); }
+        
+        .sesim-character.small .sesim-antenna {
+            width: 2px;
+            height: 18px;
+            top: -15px;
+        }
+        
+        .sesim-character.small .sesim-antenna.left { left: 20px; }
+        .sesim-character.small .sesim-antenna.right { right: 20px; }
+        
+        .sesim-antenna-ball {
+            width: 12px;
+            height: 12px;
+            background: #FFD93D;
+            border-radius: 50%;
+            position: absolute;
+            top: -7px;
+            left: -4.5px;
+            border: 2px solid #4A3728;
+        }
+        
+        .sesim-character.small .sesim-antenna-ball {
+            width: 8px;
+            height: 8px;
+            top: -5px;
+            left: -3px;
+        }
+        
+        .sesim-wing {
+            width: 30px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            border: 2px solid rgba(150, 150, 150, 0.3);
+            animation: wingFlap 0.15s ease-in-out infinite alternate;
+        }
+        
+        .sesim-wing.left { left: -17px; transform: rotate(-20deg); }
+        .sesim-wing.right { right: -17px; transform: rotate(20deg); animation-delay: 0.075s; }
+        
+        .sesim-character.small .sesim-wing {
+            width: 20px;
+            height: 26px;
+            top: 18px;
+        }
+        
+        .sesim-character.small .sesim-wing.left { left: -12px; }
+        .sesim-character.small .sesim-wing.right { right: -12px; }
+        
+        @keyframes wingFlap {
+            0% { transform: rotate(-20deg) scaleY(1); }
+            100% { transform: rotate(-30deg) scaleY(0.9); }
+        }
+        
+        .sesim-badge {
+            width: 22px;
+            height: 15px;
+            background: #FFF;
+            border: 1px solid #CCC;
+            position: absolute;
+            bottom: 17px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            font-size: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .sesim-character.small .sesim-badge {
+            width: 16px;
+            height: 11px;
+            bottom: 12px;
+            font-size: 4px;
+        }
+        
+        .start-btn {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+            padding: 12px 50px;
+            background: linear-gradient(180deg, #FFD700 0%, #FFA000 100%);
+            color: #4A3728;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #FF8F00, 0 7px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            margin-top: 15px;
+        }
+        
+        .start-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #FF8F00, 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            color: #E8EAF6;
+            font-size: clamp(0.8rem, 2.2vw, 1rem);
+            line-height: 1.7;
+            background: rgba(0,0,0,0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            max-width: 90%;
+        }
+        
+        .instructions strong {
+            color: #FFD700;
+        }
+        
+        /* 게임 화면 */
+        #game-screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: relative;
+            background: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 50%, #90CAF9 100%);
+        }
+        
+        #game-screen.active {
+            display: block;
+        }
+        
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            color: #333;
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+        }
+        
+        .hud-icon {
+            font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+        }
+        
+        .pause-btn {
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            cursor: pointer;
+            box-shadow: 0 2px 0 #E65100;
+            transition: all 0.1s;
+        }
+        
+        .pause-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 #E65100;
+        }
+        
+        /* 일시정지 오버레이 */
+        #pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+        }
+        
+        #pause-overlay.active {
+            display: flex;
+        }
+        
+        .pause-text {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: #FFF;
+            margin-bottom: 20px;
+        }
+        
+        .resume-btn {
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 40px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            cursor: pointer;
+            box-shadow: 0 4px 0 #2E7D32;
+            transition: all 0.1s;
+        }
+        
+        .resume-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2E7D32;
+        }
+        
+        /* 게임 종료 버튼 */
+        .exit-btn {
+            background: linear-gradient(180deg, #78909C 0%, #546E7A 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 50px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.8vw, 1.3rem);
+            cursor: pointer;
+            box-shadow: 0 4px 0 #455A64;
+            transition: all 0.1s;
+            margin-top: 10px;
+        }
+        
+        .exit-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #455A64;
+        }
+        
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* OX 퀴즈 모달 */
+        #quiz-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        #quiz-modal.active {
+            display: flex;
+        }
+        
+        .quiz-box {
+            background: linear-gradient(180deg, #FFF9E6 0%, #FFF 100%);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 92%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            border: 4px solid #3F51B5;
+            animation: popIn 0.3s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .quiz-icon {
+            font-size: clamp(2rem, 6vw, 2.8rem);
+        }
+        
+        .quiz-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+            color: #1A237E;
+        }
+        
+        .quiz-question {
+            font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            padding: 12px;
+            background: #FFF;
+            border-radius: 12px;
+            border: 2px solid #EEE;
+        }
+        
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .quiz-btn {
+            width: clamp(65px, 16vw, 90px);
+            height: clamp(65px, 16vw, 90px);
+            border-radius: 50%;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+        
+        .quiz-btn.o-btn {
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+        }
+        
+        .quiz-btn.x-btn {
+            background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+        }
+        
+        .quiz-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+        }
+        
+        .quiz-result {
+            display: none;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: clamp(0.85rem, 2.3vw, 1rem);
+            font-weight: 700;
+        }
+        
+        .quiz-result.correct {
+            display: block;
+            background: #E8F5E9;
+            color: #2E7D32;
+            border: 2px solid #4CAF50;
+        }
+        
+        .quiz-result.wrong {
+            display: block;
+            background: #FFEBEE;
+            color: #C62828;
+            border: 2px solid #F44336;
+        }
+        
+        .result-btn {
+            margin-top: 10px;
+            padding: 10px 22px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.85rem, 2.3vw, 1rem);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+        }
+        
+        .result-btn.retry {
+            background: #FF9800;
+            box-shadow: 0 3px 0 #F57C00;
+        }
+        
+        .result-btn.continue {
+            background: #4CAF50;
+            box-shadow: 0 3px 0 #388E3C;
+        }
+        
+        .result-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+        
+        /* 결과 화면 */
+        #result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        #result-screen.active {
+            display: flex;
+        }
+        
+        #result-screen.win {
+            background: linear-gradient(180deg, #FFE66D 0%, #FFB347 100%);
+        }
+        
+        #result-screen.lose {
+            background: linear-gradient(180deg, #546E7A 0%, #37474F 100%);
+        }
+        
+        .result-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 6.5vw, 3.2rem);
+            margin-bottom: 10px;
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+        
+        #result-screen.win .result-title {
+            color: #1A237E;
+            text-shadow: 3px 3px 0 #FFE66D;
+        }
+        
+        #result-screen.lose .result-title {
+            color: #FFF;
+            text-shadow: 3px 3px 0 #263238;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .result-stats {
+            background: rgba(255,255,255,0.92);
+            padding: 18px 30px;
+            border-radius: 16px;
+            margin: 12px 0;
+            text-align: center;
+        }
+        
+        .stat-row {
+            font-size: clamp(0.95rem, 2.7vw, 1.2rem);
+            color: #1A237E;
+            margin: 6px 0;
+            font-weight: 700;
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(180deg, #3F51B5 0%, #303F9F 100%);
+            color: #FFF;
+            padding: 10px 22px;
+            border-radius: 22px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 2.8vw, 1.3rem);
+            margin-top: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 시작 화면 -->
+        <div id="start-screen">
+            <h1 class="game-title">⚖️ 삼권분립 균형 게임</h1>
+            <p class="game-subtitle">세심이와 함께하는 정부 운영</p>
+            
+            <div class="sesim-character">
+                <div class="sesim-body">
+                    <div class="sesim-antenna left"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-antenna right"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-wing left"></div>
+                    <div class="sesim-wing right"></div>
+                    <div class="sesim-face">
+                        <div class="sesim-eye left"></div>
+                        <div class="sesim-eye right"></div>
+                        <div class="sesim-cheek left"></div>
+                        <div class="sesim-cheek right"></div>
+                        <div class="sesim-mouth"></div>
+                    </div>
+                    <div class="sesim-badge">세심</div>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">게임 시작!</button>
+            
+            <div class="instructions">
+                🎮 <strong>게임 방법</strong><br>
+                떨어지는 아이템을 알맞은 기관(힌트: 같은 색깔)에 배치하세요!<br>
+                노란색 아이템(삼권분립, 견제와 균형)이 세 기관에 닿으면 퀴즈!<br><br>
+                🏛️ <strong>입법부</strong>: 법률, 예산 심의<br>
+                🏢 <strong>행정부</strong>: 정책 집행, 도로·학교 건설<br>
+                ⚖️ <strong>사법부</strong>: 재판, 권리 보호<br><br>
+                ⭐ 세 기관의 균형을 유지하며 6개 퀴즈를 통과하세요!
+            </div>
+        </div>
+        
+        <!-- 게임 화면 -->
+        <div id="game-screen">
+            <canvas id="game-canvas"></canvas>
+            
+            <div id="hud">
+                <div class="hud-item">
+                    <span class="hud-icon">⚖️</span>
+                    <span id="balance-display">균형: 100%</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">💰</span>
+                    <span id="score-display">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">✅</span>
+                    <span id="quiz-display">0/6</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">⏱️</span>
+                    <span id="time-display">90</span>
+                </div>
+                <button class="pause-btn" onclick="togglePause()">일시정지</button>
+            </div>
+            
+            <!-- 일시정지 오버레이 -->
+            <div id="pause-overlay">
+                <div class="pause-text">⏸️ 일시정지</div>
+                <button class="resume-btn" onclick="togglePause()">계속하기</button>
+                <button class="resume-btn" onclick="restartFromPause()" style="margin-top:10px; background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%); box-shadow: 0 4px 0 #E65100;">처음부터</button>
+            </div>
+        </div>
+        
+        <!-- OX 퀴즈 모달 -->
+        <div id="quiz-modal">
+            <div class="quiz-box">
+                <div class="quiz-header">
+                    <span class="quiz-icon" id="quiz-icon">🏛️</span>
+                    <h2 class="quiz-title" id="quiz-title">정부 운영 퀴즈!</h2>
+                </div>
+                <p class="quiz-question" id="quiz-question">
+                    입법부(국회)는 법을 만들고 예산을 심의한다.
+                </p>
+                <div class="quiz-buttons" id="quiz-buttons">
+                    <button class="quiz-btn o-btn" onclick="answerQuiz(true)">O</button>
+                    <button class="quiz-btn x-btn" onclick="answerQuiz(false)">X</button>
+                </div>
+                <div class="quiz-result" id="quiz-result"></div>
+            </div>
+        </div>
+        
+        <!-- 결과 화면 -->
+        <div id="result-screen">
+            <h1 class="result-title" id="result-title">🎉 게임 클리어!</h1>
+            
+            <div class="sesim-character small">
+                <div class="sesim-body">
+                    <div class="sesim-antenna left"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-antenna right"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-wing left"></div>
+                    <div class="sesim-wing right"></div>
+                    <div class="sesim-face">
+                        <div class="sesim-eye left"></div>
+                        <div class="sesim-eye right"></div>
+                        <div class="sesim-cheek left"></div>
+                        <div class="sesim-cheek right"></div>
+                        <div class="sesim-mouth"></div>
+                    </div>
+                    <div class="sesim-badge">세심</div>
+                </div>
+            </div>
+            
+            <div class="result-stats">
+                <div class="stat-row">✅ 통과한 퀴즈: <span id="final-quiz">6</span>/6</div>
+                <div class="stat-row">💰 획득 점수: <span id="final-score">0</span>점</div>
+                <div class="stat-row">⚖️ 최종 균형: <span id="final-balance">100</span>%</div>
+            </div>
+            
+            <div class="achievement-badge" id="achievement-badge">🏆 균형 잡힌 정부 운영자!</div>
+            
+            <div class="result-buttons">
+                <button class="start-btn" onclick="restartGame()">다시 하기</button>
+                <button class="exit-btn" onclick="exitGame()">게임 종료</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 게임 설정
+        const CONFIG = {
+            GAME_TIME: 90,
+            TOTAL_QUIZZES: 6,
+            ITEM_SPAWN_RATE: 0.025,
+            SPECIAL_SPAWN_RATE: 0.008,
+            BALANCE_MAX: 100,
+            BALANCE_PENALTY: 5,
+            BALANCE_BONUS: 3
+        };
+
+        // 게임 상태
+        let gameState = {
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            balance: CONFIG.BALANCE_MAX,
+            quizzesPassed: 0,
+            timeLeft: CONFIG.GAME_TIME,
+            currentQuiz: null,
+            usedQuizIndices: [],
+            powers: {
+                legislative: 33,
+                executive: 33,
+                judicial: 34
+            },
+            screenFlash: null // 화면 플래시 효과
+        };
+
+        // 캔버스
+        let canvas, ctx;
+        let canvasWidth, canvasHeight;
+
+        // 게임 오브젝트
+        let items = [];
+        let particles = [];
+        let branches = [];
+        let draggedItem = null;
+        let sesim = null;
+
+        // 타이머
+        let gameTimer;
+
+        // 기관별 아이템
+        const legislativeItems = [
+            { icon: '📜', name: '법률안', desc: '법을 만듦' },
+            { icon: '💰', name: '예산안', desc: '예산 심의' },
+            { icon: '🗳️', name: '선거법', desc: '선거 관련 법' },
+            { icon: '📋', name: '국정감사', desc: '행정부 감시' }
+        ];
+
+        const executiveItems = [
+            { icon: '🏗️', name: '도로건설', desc: '정책 집행' },
+            { icon: '🏫', name: '학교건설', desc: '교육 정책' },
+            { icon: '🏥', name: '병원운영', desc: '복지 정책' },
+            { icon: '🚒', name: '소방서', desc: '안전 정책' }
+        ];
+
+        const judicialItems = [
+            { icon: '⚖️', name: '재판', desc: '법 해석' },
+            { icon: '🔨', name: '판결', desc: '분쟁 해결' },
+            { icon: '📖', name: '헌법재판', desc: '헌법 수호' },
+            { icon: '🛡️', name: '권리보호', desc: '국민 보호' }
+        ];
+
+        // 특수 아이템 (퀴즈 발동)
+        const specialItems = [
+            { icon: '⭐', name: '삼권분립' },
+            { icon: '🌟', name: '견제와 균형' }
+        ];
+
+        // 퀴즈 데이터
+        const quizzes = [
+            {
+                icon: '🏛️',
+                title: '입법부의 역할',
+                question: '입법부(국회)는 국민을 대표해 법을 만들고, 예산안을 심의한다.',
+                answer: true,
+                explanation: '국회는 국민의 대표로서 법률을 제정하고 국가 예산을 심의·확정합니다.'
+            },
+            {
+                icon: '🏢',
+                title: '행정부의 역할',
+                question: '행정부(대통령과 각 부처)는 법을 만드는 역할을 한다.',
+                answer: false,
+                explanation: '행정부는 법을 만드는 것이 아니라, 국회가 만든 법에 따라 정책을 집행합니다.'
+            },
+            {
+                icon: '⚖️',
+                title: '사법부의 역할',
+                question: '사법부(법원)는 법을 어긴 사람을 재판하고 국민의 권리를 보호한다.',
+                answer: true,
+                explanation: '법원은 법에 따라 재판하고, 국민의 권리와 자유를 보호하는 역할을 합니다.'
+            },
+            {
+                icon: '🔄',
+                title: '견제와 균형',
+                question: '입법부, 행정부, 사법부는 서로 견제하고 균형을 이루며 나라를 운영한다.',
+                answer: true,
+                explanation: '세 기관이 서로 견제하고 협력해야 나라가 올바르게 운영됩니다.'
+            },
+            {
+                icon: '💰',
+                title: '세금과 정부',
+                question: '정부의 모든 활동(도로, 학교, 복지 등)은 국민이 낸 세금으로 이루어진다.',
+                answer: true,
+                explanation: '세금은 정부가 공공 서비스를 제공하기 위한 필수 재원입니다.'
+            },
+            {
+                icon: '📜',
+                title: '조세 법률주의',
+                question: '세금은 정부가 마음대로 정할 수 있으며, 법률이 필요 없다.',
+                answer: false,
+                explanation: '세금은 반드시 국민의 대표인 국회에서 법률로 정해야 합니다(조세 법률주의).'
+            }
+        ];
+
+        // 초기화
+        function init() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 터치/마우스 이벤트
+            canvas.addEventListener('mousedown', handlePointerDown);
+            canvas.addEventListener('mousemove', handlePointerMove);
+            canvas.addEventListener('mouseup', handlePointerUp);
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
+            
+            // 모바일에서 주소창 등에 의한 높이 변화 대응
+            document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+            
+            setupBranches();
+        }
+
+        function setupBranches() {
+            const branchWidth = canvasWidth / 3;
+            const branchHeight = 120;
+            const branchY = canvasHeight - branchHeight - 20;
+            
+            branches = [
+                {
+                    name: '입법부',
+                    subtitle: '국회',
+                    icon: '🏛️',
+                    color: '#E91E63',
+                    x: 0,
+                    y: branchY,
+                    width: branchWidth,
+                    height: branchHeight,
+                    items: legislativeItems,
+                    type: 'legislative'
+                },
+                {
+                    name: '행정부',
+                    subtitle: '대통령·각 부처',
+                    icon: '🏢',
+                    color: '#2196F3',
+                    x: branchWidth,
+                    y: branchY,
+                    width: branchWidth,
+                    height: branchHeight,
+                    items: executiveItems,
+                    type: 'executive'
+                },
+                {
+                    name: '사법부',
+                    subtitle: '법원',
+                    icon: '⚖️',
+                    color: '#4CAF50',
+                    x: branchWidth * 2,
+                    y: branchY,
+                    width: branchWidth,
+                    height: branchHeight,
+                    items: judicialItems,
+                    type: 'judicial'
+                }
+            ];
+        }
+
+        function handlePointerDown(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            checkItemGrab(x, y);
+        }
+
+        function handlePointerMove(e) {
+            if (!gameState.isPlaying || gameState.isPaused || !draggedItem) return;
+            const rect = canvas.getBoundingClientRect();
+            draggedItem.x = e.clientX - rect.left;
+            draggedItem.y = e.clientY - rect.top;
+        }
+
+        function handlePointerUp(e) {
+            if (!gameState.isPlaying || gameState.isPaused || !draggedItem) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            checkItemDrop(x, y);
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            checkItemGrab(x, y);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying || gameState.isPaused || !draggedItem) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            draggedItem.x = touch.clientX - rect.left;
+            draggedItem.y = touch.clientY - rect.top;
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying || gameState.isPaused || !draggedItem) return;
+            checkItemDrop(draggedItem.x, draggedItem.y);
+        }
+
+        function checkItemGrab(x, y) {
+            for (let i = items.length - 1; i >= 0; i--) {
+                const item = items[i];
+                const dist = Math.sqrt((x - item.x) ** 2 + (y - item.y) ** 2);
+                if (dist < item.size + 15) {
+                    draggedItem = item;
+                    draggedItem.isDragging = true;
+                    items.splice(i, 1);
+                    items.push(draggedItem);
+                    break;
+                }
+            }
+        }
+
+        function checkItemDrop(x, y) {
+            if (!draggedItem) return;
+            
+            let dropped = false;
+            let isSpecialItem = draggedItem.type === 'special';
+            
+            for (const branch of branches) {
+                if (x >= branch.x && x < branch.x + branch.width &&
+                    y >= branch.y && y < branch.y + branch.height) {
+                    
+                    // 특수 아이템 (퀴즈)
+                    if (isSpecialItem) {
+                        // 먼저 아이템 제거
+                        const idx = items.indexOf(draggedItem);
+                        if (idx > -1) items.splice(idx, 1);
+                        draggedItem = null;
+                        
+                        showQuiz();
+                        return; // 퀴즈 모달이 열리므로 여기서 종료
+                    }
+                    
+                    // 일반 아이템 - 올바른 기관에 배치했는지 확인
+                    if (draggedItem.correctBranch === branch.type) {
+                        // 정답!
+                        gameState.score += 20;
+                        gameState.balance = Math.min(CONFIG.BALANCE_MAX, gameState.balance + CONFIG.BALANCE_BONUS);
+                        adjustPowers(branch.type, 2);
+                        createParticles(x, y, branch.color, 15);
+                        // 초록색 플래시
+                        gameState.screenFlash = { color: 'rgba(76, 175, 80, 0.3)', time: 15 };
+                    } else {
+                        // 오답
+                        gameState.score -= 5;
+                        gameState.balance = Math.max(0, gameState.balance - CONFIG.BALANCE_PENALTY);
+                        adjustPowers(branch.type, -3);
+                        createParticles(x, y, '#F44336', 10);
+                        // 빨간색 플래시
+                        gameState.screenFlash = { color: 'rgba(244, 67, 54, 0.4)', time: 20 };
+                    }
+                    
+                    dropped = true;
+                    break;
+                }
+            }
+            
+            // 아이템 제거 (draggedItem이 아직 존재하는 경우)
+            if (draggedItem) {
+                const idx = items.indexOf(draggedItem);
+                if (idx > -1) {
+                    items.splice(idx, 1);
+                }
+                draggedItem.isDragging = false;
+                draggedItem = null;
+            }
+            
+            updateHUD();
+            checkGameStatus();
+        }
+
+        function adjustPowers(type, amount) {
+            gameState.powers[type] = Math.max(10, Math.min(60, gameState.powers[type] + amount));
+            
+            // 다른 기관들 조정
+            const others = ['legislative', 'executive', 'judicial'].filter(t => t !== type);
+            const adjustment = -amount / 2;
+            others.forEach(t => {
+                gameState.powers[t] = Math.max(10, Math.min(60, gameState.powers[t] + adjustment));
+            });
+            
+            // 균형 계산
+            const avg = (gameState.powers.legislative + gameState.powers.executive + gameState.powers.judicial) / 3;
+            const variance = Math.abs(gameState.powers.legislative - avg) + 
+                           Math.abs(gameState.powers.executive - avg) + 
+                           Math.abs(gameState.powers.judicial - avg);
+            gameState.balance = Math.max(0, Math.min(100, 100 - variance * 2));
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('active');
+            
+            resetGameState();
+            setupBranches();
+            createSesim();
+            
+            gameState.isPlaying = true;
+            
+            gameTimer = setInterval(() => {
+                if (!gameState.isPaused && gameState.isPlaying) {
+                    gameState.timeLeft--;
+                    updateHUD();
+                    
+                    if (gameState.timeLeft <= 0) {
+                        checkGameEnd();
+                    }
+                }
+            }, 1000);
+            
+            updateHUD();
+            gameLoop();
+        }
+
+        function resetGameState() {
+            gameState.score = 0;
+            gameState.balance = CONFIG.BALANCE_MAX;
+            gameState.quizzesPassed = 0;
+            gameState.timeLeft = CONFIG.GAME_TIME;
+            gameState.isPaused = false;
+            gameState.currentQuiz = null;
+            gameState.usedQuizIndices = [];
+            gameState.powers = { legislative: 33, executive: 33, judicial: 34 };
+            gameState.screenFlash = null;
+            items = [];
+            particles = [];
+            draggedItem = null;
+        }
+
+        function createSesim() {
+            sesim = {
+                x: canvasWidth / 2,
+                y: 150,
+                size: 50,
+                wingAngle: 0,
+                floatOffset: 0
+            };
+        }
+
+        function restartGame() {
+            document.getElementById('result-screen').classList.remove('active', 'win', 'lose');
+            document.getElementById('game-screen').classList.add('active');
+            
+            resetGameState();
+            setupBranches();
+            createSesim();
+            
+            gameState.isPlaying = true;
+            
+            gameTimer = setInterval(() => {
+                if (!gameState.isPaused && gameState.isPlaying) {
+                    gameState.timeLeft--;
+                    updateHUD();
+                    
+                    if (gameState.timeLeft <= 0) {
+                        checkGameEnd();
+                    }
+                }
+            }, 1000);
+            
+            updateHUD();
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+            
+            if (!gameState.isPaused) {
+                update();
+            }
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            // 아이템 생성
+            spawnItems();
+            
+            // 아이템 업데이트
+            items.forEach((item, index) => {
+                if (!item.isDragging) {
+                    item.y += item.speed;
+                    item.rotation += 0.02;
+                }
+                
+                // 화면 아래로 나가면 제거 (균형 감소)
+                if (item.y > canvasHeight + 50) {
+                    gameState.balance = Math.max(0, gameState.balance - 2);
+                    items.splice(index, 1);
+                    updateHUD();
+                }
+            });
+            
+            // 파티클 업데이트
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1;
+                p.life--;
+                return p.life > 0;
+            });
+            
+            // 세심이 애니메이션
+            if (sesim) {
+                sesim.wingAngle += 0.3;
+                sesim.floatOffset = Math.sin(Date.now() * 0.003) * 8;
+            }
+            
+            // 균형 체크
+            if (gameState.balance <= 0) {
+                gameOver(false);
+            }
+        }
+
+        function spawnItems() {
+            // 특수 아이템 (퀴즈)
+            if (Math.random() < CONFIG.SPECIAL_SPAWN_RATE && gameState.quizzesPassed < CONFIG.TOTAL_QUIZZES) {
+                const special = specialItems[Math.floor(Math.random() * specialItems.length)];
+                items.push({
+                    x: Math.random() * (canvasWidth - 100) + 50,
+                    y: -40,
+                    size: 35,
+                    speed: 1.5 + Math.random(),
+                    rotation: 0,
+                    type: 'special',
+                    icon: special.icon,
+                    name: special.name,
+                    isDragging: false
+                });
+            }
+            
+            // 일반 아이템
+            if (Math.random() < CONFIG.ITEM_SPAWN_RATE) {
+                const branchType = Math.random();
+                let itemList, correctBranch, color;
+                
+                if (branchType < 0.33) {
+                    itemList = legislativeItems;
+                    correctBranch = 'legislative';
+                    color = '#E91E63';
+                } else if (branchType < 0.66) {
+                    itemList = executiveItems;
+                    correctBranch = 'executive';
+                    color = '#2196F3';
+                } else {
+                    itemList = judicialItems;
+                    correctBranch = 'judicial';
+                    color = '#4CAF50';
+                }
+                
+                const item = itemList[Math.floor(Math.random() * itemList.length)];
+                
+                items.push({
+                    x: Math.random() * (canvasWidth - 100) + 50,
+                    y: -40,
+                    size: 30,
+                    speed: 2 + Math.random() * 1.5,
+                    rotation: 0,
+                    type: 'normal',
+                    icon: item.icon,
+                    name: item.name,
+                    desc: item.desc,
+                    correctBranch: correctBranch,
+                    color: color,
+                    isDragging: false
+                });
+            }
+        }
+
+        function showQuiz() {
+            gameState.isPaused = true;
+            
+            // 사용하지 않은 퀴즈 선택
+            const availableQuizzes = [];
+            for (let i = 0; i < quizzes.length; i++) {
+                if (!gameState.usedQuizIndices.includes(i)) {
+                    availableQuizzes.push(i);
+                }
+            }
+            
+            let quizIndex;
+            if (availableQuizzes.length > 0) {
+                quizIndex = availableQuizzes[Math.floor(Math.random() * availableQuizzes.length)];
+            } else {
+                quizIndex = Math.floor(Math.random() * quizzes.length);
+            }
+            
+            const quiz = quizzes[quizIndex];
+            gameState.currentQuiz = { ...quiz, index: quizIndex };
+            
+            document.getElementById('quiz-icon').textContent = quiz.icon;
+            document.getElementById('quiz-title').textContent = quiz.title;
+            document.getElementById('quiz-question').textContent = quiz.question;
+            document.getElementById('quiz-result').className = 'quiz-result';
+            document.getElementById('quiz-result').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+            
+            // 드래그 중인 아이템 제거
+            if (draggedItem) {
+                const idx = items.indexOf(draggedItem);
+                if (idx > -1) items.splice(idx, 1);
+                draggedItem = null;
+            }
+            
+            document.getElementById('quiz-modal').classList.add('active');
+        }
+
+        function answerQuiz(answer) {
+            const quiz = gameState.currentQuiz;
+            const resultDiv = document.getElementById('quiz-result');
+            const buttonsDiv = document.getElementById('quiz-buttons');
+            
+            if (answer === quiz.answer) {
+                resultDiv.className = 'quiz-result correct';
+                resultDiv.innerHTML = `
+                    <p>🎉 정답이에요!</p>
+                    <p style="margin-top: 6px; font-weight: normal; font-size: 0.9em;">${quiz.explanation}</p>
+                    <button class="result-btn continue" onclick="closeQuiz(true)">계속하기 (+30점)</button>
+                `;
+                buttonsDiv.style.display = 'none';
+            } else {
+                resultDiv.className = 'quiz-result wrong';
+                resultDiv.innerHTML = `
+                    <p>❌ 틀렸어요!</p>
+                    <p style="margin-top: 6px; font-weight: normal; font-size: 0.9em;">다시 생각해보세요!</p>
+                    <button class="result-btn retry" onclick="retryQuiz()">다시 풀기</button>
+                `;
+                buttonsDiv.style.display = 'none';
+            }
+        }
+
+        function retryQuiz() {
+            document.getElementById('quiz-result').className = 'quiz-result';
+            document.getElementById('quiz-result').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+        }
+
+        function closeQuiz(success) {
+            document.getElementById('quiz-modal').classList.remove('active');
+            
+            if (success) {
+                gameState.quizzesPassed++;
+                gameState.usedQuizIndices.push(gameState.currentQuiz.index);
+                gameState.score += 30;
+                gameState.balance = Math.min(CONFIG.BALANCE_MAX, gameState.balance + 10);
+                updateHUD();
+                
+                if (gameState.quizzesPassed >= CONFIG.TOTAL_QUIZZES) {
+                    setTimeout(() => gameOver(true), 500);
+                    return;
+                }
+            }
+            
+            gameState.isPaused = false;
+            gameState.currentQuiz = null;
+        }
+
+        function checkGameStatus() {
+            if (gameState.balance <= 0) {
+                gameOver(false);
+            }
+        }
+
+        function checkGameEnd() {
+            if (gameState.quizzesPassed >= CONFIG.TOTAL_QUIZZES) {
+                gameOver(true);
+            } else {
+                gameOver(false);
+            }
+        }
+
+        function gameOver(isWin) {
+            gameState.isPlaying = false;
+            clearInterval(gameTimer);
+            
+            document.getElementById('game-screen').classList.remove('active');
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.add('active');
+            resultScreen.classList.add(isWin ? 'win' : 'lose');
+            
+            document.getElementById('result-title').textContent = isWin ? '🎉 게임 클리어!' : '😢 게임 오버';
+            document.getElementById('final-quiz').textContent = gameState.quizzesPassed;
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-balance').textContent = Math.round(gameState.balance);
+            
+            if (isWin) {
+                document.getElementById('achievement-badge').textContent = '🏆 균형 잡힌 정부 운영자!';
+            } else if (gameState.balance <= 0) {
+                document.getElementById('achievement-badge').textContent = '균형이 무너졌습니다...';
+            } else {
+                document.getElementById('achievement-badge').textContent = '시간 내에 퀴즈를 통과하지 못했습니다...';
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('balance-display').textContent = `균형: ${Math.round(gameState.balance)}%`;
+            document.getElementById('score-display').textContent = gameState.score;
+            document.getElementById('quiz-display').textContent = `${gameState.quizzesPassed}/${CONFIG.TOTAL_QUIZZES}`;
+            document.getElementById('time-display').textContent = gameState.timeLeft;
+        }
+
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 2,
+                    color: color,
+                    size: Math.random() * 6 + 3,
+                    life: 40
+                });
+            }
+        }
+
+        function draw() {
+            // 배경
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+            gradient.addColorStop(0, '#E3F2FD');
+            gradient.addColorStop(0.5, '#BBDEFB');
+            gradient.addColorStop(1, '#90CAF9');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 균형 표시 (상단 바)
+            drawBalanceBar();
+            
+            // 세심이
+            if (sesim) drawSesim();
+            
+            // 기관 영역
+            branches.forEach(branch => drawBranch(branch));
+            
+            // 아이템
+            items.forEach(item => drawItem(item));
+            
+            // 파티클
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life / 40;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            
+            // 화면 플래시 효과
+            if (gameState.screenFlash && gameState.screenFlash.time > 0) {
+                ctx.fillStyle = gameState.screenFlash.color;
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                gameState.screenFlash.time--;
+                
+                if (gameState.screenFlash.time <= 0) {
+                    gameState.screenFlash = null;
+                }
+            }
+        }
+
+        function drawBalanceBar() {
+            const barY = 60;
+            const barHeight = 20;
+            const barWidth = canvasWidth - 40;
+            const barX = 20;
+            
+            // 배경
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath();
+            ctx.roundRect(barX, barY, barWidth, barHeight, 10);
+            ctx.fill();
+            
+            // 세 기관 파워 바
+            const legWidth = (gameState.powers.legislative / 100) * barWidth;
+            const exeWidth = (gameState.powers.executive / 100) * barWidth;
+            const judWidth = (gameState.powers.judicial / 100) * barWidth;
+            
+            // 입법부
+            ctx.fillStyle = '#E91E63';
+            ctx.beginPath();
+            ctx.roundRect(barX, barY, legWidth, barHeight, [10, 0, 0, 10]);
+            ctx.fill();
+            
+            // 행정부
+            ctx.fillStyle = '#2196F3';
+            ctx.fillRect(barX + legWidth, barY, exeWidth, barHeight);
+            
+            // 사법부
+            ctx.fillStyle = '#4CAF50';
+            ctx.beginPath();
+            ctx.roundRect(barX + legWidth + exeWidth, barY, judWidth, barHeight, [0, 10, 10, 0]);
+            ctx.fill();
+        }
+
+        function drawSesim() {
+            const x = sesim.x;
+            const y = sesim.y + sesim.floatOffset;
+            const size = sesim.size;
+            
+            ctx.save();
+            
+            // 날개
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.strokeStyle = 'rgba(150, 150, 150, 0.4)';
+            ctx.lineWidth = 2;
+            
+            const wingOffset = Math.sin(sesim.wingAngle) * 4;
+            
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.7, y + wingOffset, size * 0.35, size * 0.5, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.ellipse(x + size * 0.7, y - wingOffset, size * 0.35, size * 0.5, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // 몸통
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.55, 0, Math.PI * 2);
+            ctx.fillStyle = '#4A3728';
+            ctx.fill();
+            ctx.strokeStyle = '#3D2E1F';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 노란 배
+            ctx.beginPath();
+            ctx.arc(x, y + size * 0.15, size * 0.45, 0.2, Math.PI - 0.2);
+            ctx.fillStyle = '#FFD93D';
+            ctx.fill();
+            
+            // 얼굴
+            ctx.beginPath();
+            ctx.ellipse(x, y - size * 0.12, size * 0.38, size * 0.3, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFE4B5';
+            ctx.fill();
+            
+            // 눈
+            ctx.fillStyle = '#2D2D2D';
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.15, y - size * 0.15, size * 0.07, size * 0.09, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + size * 0.15, y - size * 0.15, size * 0.07, size * 0.09, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 볼터치
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.28, y - size * 0.05, size * 0.08, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + size * 0.28, y - size * 0.05, size * 0.08, size * 0.05, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 입
+            ctx.fillStyle = '#E85A4F';
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.08, 0, Math.PI);
+            ctx.fill();
+            
+            // 더듬이
+            ctx.strokeStyle = '#4A3728';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.15, y - size * 0.4);
+            ctx.lineTo(x - size * 0.25, y - size * 0.7);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.15, y - size * 0.4);
+            ctx.lineTo(x + size * 0.25, y - size * 0.7);
+            ctx.stroke();
+            
+            // 더듬이 끝 공
+            ctx.fillStyle = '#FFD93D';
+            ctx.strokeStyle = '#4A3728';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x - size * 0.25, y - size * 0.73, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x + size * 0.25, y - size * 0.73, size * 0.12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // 말풍선
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.beginPath();
+            ctx.roundRect(x + size * 0.7, y - size * 0.5, 120, 40, 10);
+            ctx.fill();
+            ctx.strokeStyle = '#3F51B5';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#1A237E';
+            ctx.font = 'bold 12px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('아이템을 알맞은', x + size * 0.7 + 60, y - size * 0.5 + 13);
+            ctx.fillText('기관에 배치해요!', x + size * 0.7 + 60, y - size * 0.5 + 28);
+            
+            ctx.restore();
+        }
+
+        function drawBranch(branch) {
+            // 배경
+            ctx.fillStyle = branch.color + '30';
+            ctx.beginPath();
+            ctx.roundRect(branch.x + 5, branch.y, branch.width - 10, branch.height, 15);
+            ctx.fill();
+            
+            // 테두리
+            ctx.strokeStyle = branch.color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 아이콘
+            ctx.font = '40px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(branch.icon, branch.x + branch.width / 2, branch.y + 45);
+            
+            // 이름
+            ctx.fillStyle = branch.color;
+            ctx.font = 'bold 16px Noto Sans KR';
+            ctx.fillText(branch.name, branch.x + branch.width / 2, branch.y + 75);
+            
+            // 부제
+            ctx.fillStyle = '#666';
+            ctx.font = '11px Noto Sans KR';
+            ctx.fillText(branch.subtitle, branch.x + branch.width / 2, branch.y + 95);
+        }
+
+        function drawItem(item) {
+            ctx.save();
+            ctx.translate(item.x, item.y);
+            
+            if (!item.isDragging) {
+                ctx.rotate(item.rotation);
+            }
+            
+            // 특수 아이템 글로우
+            if (item.type === 'special') {
+                const glowSize = item.size + 15 + Math.sin(Date.now() * 0.005) * 5;
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                gradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 배경
+            if (item.type === 'special') {
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+            } else {
+                ctx.fillStyle = item.color + '40';
+            }
+            ctx.beginPath();
+            ctx.arc(0, 0, item.size + 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            if (item.type !== 'special') {
+                ctx.strokeStyle = item.color;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            
+            // 아이콘
+            ctx.font = `${item.size * 1.3}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.icon, 0, 0);
+            
+            ctx.restore();
+            
+            // 드래그 중일 때 이름 표시
+            if (item.isDragging && item.name) {
+                ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                ctx.font = 'bold 14px Noto Sans KR';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.name, item.x, item.y + item.size + 20);
+            }
+        }
+
+        function togglePause() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.isPaused = !gameState.isPaused;
+            
+            const pauseOverlay = document.getElementById('pause-overlay');
+            if (gameState.isPaused) {
+                pauseOverlay.classList.add('active');
+            } else {
+                pauseOverlay.classList.remove('active');
+            }
+        }
+
+        function restartFromPause() {
+            gameState.isPaused = false;
+            gameState.isPlaying = false;
+            document.getElementById('pause-overlay').classList.remove('active');
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.remove('hidden');
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+        }
+
+        function exitGame() {
+            window.close();
+            // window.close()가 작동하지 않는 경우 안내 메시지 표시
+            setTimeout(function() {
+                alert('창을 닫을 수 없습니다. 브라우저 탭을 직접 닫아주세요.');
+            }, 100);
+        }
+
+        // 시작
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

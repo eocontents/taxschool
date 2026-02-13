@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>공평한 세금 분배 - 세심이와 함께하는 조세 형평성</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 시작 화면 */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 50%, #E65100 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s, visibility 0.5s;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        
+        #start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .game-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: #FFF;
+            text-shadow: 2px 2px 0 #E65100, 4px 4px 0 rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .game-subtitle {
+            font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+            color: #FFF3E0;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        /* 세심이 캐릭터 */
+        .sesim-character {
+            width: 100px;
+            height: 120px;
+            position: relative;
+            margin: 15px auto;
+            animation: float 2s ease-in-out infinite;
+        }
+        
+        .sesim-character.small {
+            width: 70px;
+            height: 85px;
+            margin: 10px auto;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .sesim-body {
+            width: 85px;
+            height: 85px;
+            background: linear-gradient(180deg, #4A3728 0%, #4A3728 45%, #FFD93D 45%, #FFD93D 100%);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #3D2E1F;
+        }
+        
+        .sesim-character.small .sesim-body {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .sesim-face {
+            width: 60px;
+            height: 42px;
+            background: #FFE4B5;
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .sesim-character.small .sesim-face {
+            width: 42px;
+            height: 30px;
+            top: 8px;
+        }
+        
+        .sesim-eye {
+            width: 7px;
+            height: 9px;
+            background: #2D2D2D;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+        }
+        
+        .sesim-eye.left { left: 15px; }
+        .sesim-eye.right { right: 15px; }
+        
+        .sesim-character.small .sesim-eye {
+            width: 5px;
+            height: 6px;
+            top: 10px;
+        }
+        
+        .sesim-character.small .sesim-eye.left { left: 10px; }
+        .sesim-character.small .sesim-eye.right { right: 10px; }
+        
+        .sesim-mouth {
+            width: 12px;
+            height: 8px;
+            background: #E85A4F;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .sesim-character.small .sesim-mouth {
+            width: 8px;
+            height: 5px;
+            bottom: 7px;
+        }
+        
+        .sesim-cheek {
+            width: 10px;
+            height: 6px;
+            background: #FFB6C1;
+            border-radius: 50%;
+            position: absolute;
+            top: 24px;
+            opacity: 0.7;
+        }
+        
+        .sesim-cheek.left { left: 6px; }
+        .sesim-cheek.right { right: 6px; }
+        
+        .sesim-character.small .sesim-cheek {
+            width: 7px;
+            height: 4px;
+            top: 17px;
+        }
+        
+        .sesim-character.small .sesim-cheek.left { left: 4px; }
+        .sesim-character.small .sesim-cheek.right { right: 4px; }
+        
+        .sesim-antenna {
+            width: 3px;
+            height: 25px;
+            background: #4A3728;
+            position: absolute;
+            top: -20px;
+            border-radius: 2px;
+        }
+        
+        .sesim-antenna.left { left: 30px; transform: rotate(-15deg); }
+        .sesim-antenna.right { right: 30px; transform: rotate(15deg); }
+        
+        .sesim-character.small .sesim-antenna {
+            width: 2px;
+            height: 18px;
+            top: -15px;
+        }
+        
+        .sesim-character.small .sesim-antenna.left { left: 20px; }
+        .sesim-character.small .sesim-antenna.right { right: 20px; }
+        
+        .sesim-antenna-ball {
+            width: 12px;
+            height: 12px;
+            background: #FFD93D;
+            border-radius: 50%;
+            position: absolute;
+            top: -7px;
+            left: -4.5px;
+            border: 2px solid #4A3728;
+        }
+        
+        .sesim-character.small .sesim-antenna-ball {
+            width: 8px;
+            height: 8px;
+            top: -5px;
+            left: -3px;
+        }
+        
+        .sesim-wing {
+            width: 30px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            border: 2px solid rgba(150, 150, 150, 0.3);
+            animation: wingFlap 0.15s ease-in-out infinite alternate;
+        }
+        
+        .sesim-wing.left { left: -17px; transform: rotate(-20deg); }
+        .sesim-wing.right { right: -17px; transform: rotate(20deg); animation-delay: 0.075s; }
+        
+        .sesim-character.small .sesim-wing {
+            width: 20px;
+            height: 26px;
+            top: 18px;
+        }
+        
+        .sesim-character.small .sesim-wing.left { left: -12px; }
+        .sesim-character.small .sesim-wing.right { right: -12px; }
+        
+        @keyframes wingFlap {
+            0% { transform: rotate(-20deg) scaleY(1); }
+            100% { transform: rotate(-30deg) scaleY(0.9); }
+        }
+        
+        .sesim-badge {
+            width: 22px;
+            height: 15px;
+            background: #FFF;
+            border: 1px solid #CCC;
+            position: absolute;
+            bottom: 17px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            font-size: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .sesim-character.small .sesim-badge {
+            width: 16px;
+            height: 11px;
+            bottom: 12px;
+            font-size: 4px;
+        }
+        
+        .start-btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            padding: 12px 50px;
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #2E7D32, 0 7px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            margin-top: 15px;
+        }
+        
+        .start-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #2E7D32, 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            color: #FFF3E0;
+            font-size: clamp(0.8rem, 2.2vw, 1rem);
+            line-height: 1.7;
+            background: rgba(0,0,0,0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            max-width: 90%;
+        }
+        
+        .instructions strong {
+            color: #FFEB3B;
+        }
+        
+        /* 게임 화면 */
+        #game-screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: relative;
+            background: linear-gradient(180deg, #FFF8E1 0%, #FFECB3 50%, #FFE082 100%);
+        }
+        
+        #game-screen.active {
+            display: block;
+        }
+        
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            color: #333;
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+        }
+        
+        .hud-icon {
+            font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+        }
+        
+        /* 일시정지 버튼 */
+        #pause-btn {
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            cursor: pointer;
+            box-shadow: 0 2px 0 #E65100;
+            transition: all 0.1s;
+        }
+        
+        #pause-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 #E65100;
+        }
+        
+        /* 일시정지 오버레이 */
+        #pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            z-index: 40;
+        }
+        
+        #pause-overlay.active {
+            display: flex;
+        }
+        
+        .pause-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: #FFF;
+            margin-bottom: 30px;
+        }
+        
+        .pause-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .pause-menu-btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 500;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            padding: 15px 40px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        
+        .pause-menu-btn.resume {
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            box-shadow: 0 4px 0 #2E7D32;
+        }
+        
+        .pause-menu-btn.quit {
+            background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+            box-shadow: 0 4px 0 #B71C1C;
+        }
+        
+        .pause-menu-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+        
+        /* OX 퀴즈 모달 */
+        #quiz-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        #quiz-modal.active {
+            display: flex;
+        }
+        
+        .quiz-box {
+            background: linear-gradient(180deg, #FFF9E6 0%, #FFF 100%);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 92%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            border: 4px solid #FF9800;
+            animation: popIn 0.3s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .quiz-icon {
+            font-size: clamp(2rem, 6vw, 2.8rem);
+        }
+        
+        .quiz-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+            color: #E65100;
+        }
+        
+        .quiz-question {
+            font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            padding: 12px;
+            background: #FFF;
+            border-radius: 12px;
+            border: 2px solid #EEE;
+        }
+        
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .quiz-btn {
+            width: clamp(65px, 16vw, 90px);
+            height: clamp(65px, 16vw, 90px);
+            border-radius: 50%;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+        
+        .quiz-btn.o-btn {
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+        }
+        
+        .quiz-btn.x-btn {
+            background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+        }
+        
+        .quiz-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+        }
+        
+        .quiz-result {
+            display: none;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: clamp(0.85rem, 2.3vw, 1rem);
+            font-weight: 700;
+        }
+        
+        .quiz-result.correct {
+            display: block;
+            background: #E8F5E9;
+            color: #2E7D32;
+            border: 2px solid #4CAF50;
+        }
+        
+        .quiz-result.wrong {
+            display: block;
+            background: #FFEBEE;
+            color: #C62828;
+            border: 2px solid #F44336;
+        }
+        
+        .result-btn {
+            margin-top: 10px;
+            padding: 10px 22px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 500;
+            font-size: clamp(0.85rem, 2.3vw, 1rem);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+        }
+        
+        .result-btn.retry {
+            background: #FF9800;
+            box-shadow: 0 3px 0 #F57C00;
+        }
+        
+        .result-btn.continue {
+            background: #4CAF50;
+            box-shadow: 0 3px 0 #388E3C;
+        }
+        
+        .result-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+        
+        /* 결과 화면 */
+        #result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        #result-screen.active {
+            display: flex;
+        }
+        
+        #result-screen.win {
+            background: linear-gradient(180deg, #FFE66D 0%, #FFB347 100%);
+        }
+        
+        #result-screen.lose {
+            background: linear-gradient(180deg, #546E7A 0%, #37474F 100%);
+        }
+        
+        .result-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.8rem, 5.5vw, 2.8rem);
+            margin-bottom: 10px;
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+        
+        #result-screen.win .result-title {
+            color: #E65100;
+            text-shadow: 2px 2px 0 #FFE66D;
+        }
+        
+        #result-screen.lose .result-title {
+            color: #FFF;
+            text-shadow: 2px 2px 0 #263238;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .result-stats {
+            background: rgba(255,255,255,0.92);
+            padding: 18px 30px;
+            border-radius: 16px;
+            margin: 12px 0;
+            text-align: center;
+        }
+        
+        .stat-row {
+            font-size: clamp(0.95rem, 2.7vw, 1.2rem);
+            color: #E65100;
+            margin: 6px 0;
+            font-weight: 700;
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+            color: #FFF;
+            padding: 10px 22px;
+            border-radius: 22px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 500;
+            font-size: clamp(1rem, 2.8vw, 1.3rem);
+            margin-top: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+        }
+        
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .end-btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 500;
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            padding: 12px 40px;
+            background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #B71C1C, 0 6px 12px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+        
+        .end-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #B71C1C, 0 2px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 시작 화면 -->
+        <div id="start-screen">
+            <h1 class="game-title">⚖️ 공평한 세금 분배</h1>
+            <p class="game-subtitle">세심이와 함께하는 조세 형평성</p>
+            
+            <div class="sesim-character">
+                <div class="sesim-body">
+                    <div class="sesim-antenna left"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-antenna right"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-wing left"></div>
+                    <div class="sesim-wing right"></div>
+                    <div class="sesim-face">
+                        <div class="sesim-eye left"></div>
+                        <div class="sesim-eye right"></div>
+                        <div class="sesim-cheek left"></div>
+                        <div class="sesim-cheek right"></div>
+                        <div class="sesim-mouth"></div>
+                    </div>
+                    <div class="sesim-badge">세심</div>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">게임 시작!</button>
+            
+            <div class="instructions">
+                🎮 <strong>게임 방법</strong><br>
+                시민들에게 소득에 맞는 세금을 분배하세요!<br><br>
+                📊 <strong>수직적 형평성</strong>: 소득이 많으면 세금도 많이!<br>
+                📊 <strong>수평적 형평성</strong>: 소득이 같으면 세금도 같게!<br><br>
+                ⭐ 세금 코인을 드래그하여 시민에게 배분하세요!<br>
+                🎯 6개의 라운드와 6개의 퀴즈를 통과하면 승리!
+            </div>
+        </div>
+        
+        <!-- 게임 화면 -->
+        <div id="game-screen">
+            <canvas id="game-canvas"></canvas>
+            
+            <div id="hud">
+                <div class="hud-item">
+                    <span class="hud-icon">🎯</span>
+                    <span id="round-display">라운드 1/6</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">💰</span>
+                    <span id="score-display">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">✅</span>
+                    <span id="quiz-display">0/6</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">⚖️</span>
+                    <span id="fairness-display">공정도: 100%</span>
+                </div>
+                <button id="pause-btn" onclick="togglePause()">일시정지</button>
+            </div>
+            
+            <!-- 일시정지 오버레이 -->
+            <div id="pause-overlay">
+                <h2 class="pause-title">⏸️ 일시 정지</h2>
+                <div class="pause-btn-group">
+                    <button class="pause-menu-btn resume" onclick="togglePause()">▶️ 계속 하기</button>
+                    <button class="pause-menu-btn quit" onclick="quitToStart()">🏠 처음으로</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- OX 퀴즈 모달 -->
+        <div id="quiz-modal">
+            <div class="quiz-box">
+                <div class="quiz-header">
+                    <span class="quiz-icon" id="quiz-icon">⚖️</span>
+                    <h2 class="quiz-title" id="quiz-title">조세 형평성 퀴즈!</h2>
+                </div>
+                <p class="quiz-question" id="quiz-question">
+                    수직적 형평성이란 소득이 많은 사람이 더 많은 세금을 내는 것이다.
+                </p>
+                <div class="quiz-buttons" id="quiz-buttons">
+                    <button class="quiz-btn o-btn" onclick="answerQuiz(true)">O</button>
+                    <button class="quiz-btn x-btn" onclick="answerQuiz(false)">X</button>
+                </div>
+                <div class="quiz-result" id="quiz-result"></div>
+            </div>
+        </div>
+        
+        <!-- 결과 화면 -->
+        <div id="result-screen">
+            <h1 class="result-title" id="result-title">🎉 게임 클리어!</h1>
+            
+            <div class="sesim-character small">
+                <div class="sesim-body">
+                    <div class="sesim-antenna left"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-antenna right"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-wing left"></div>
+                    <div class="sesim-wing right"></div>
+                    <div class="sesim-face">
+                        <div class="sesim-eye left"></div>
+                        <div class="sesim-eye right"></div>
+                        <div class="sesim-cheek left"></div>
+                        <div class="sesim-cheek right"></div>
+                        <div class="sesim-mouth"></div>
+                    </div>
+                    <div class="sesim-badge">세심</div>
+                </div>
+            </div>
+            
+            <div class="result-stats">
+                <div class="stat-row">✅ 통과한 퀴즈: <span id="final-quiz">6</span>/6</div>
+                <div class="stat-row">💰 획득 점수: <span id="final-score">0</span>점</div>
+                <div class="stat-row">⚖️ 평균 공정도: <span id="final-fairness">100</span>%</div>
+            </div>
+            
+            <div class="achievement-badge" id="achievement-badge">🏆 공정한 세무사!</div>
+            
+            <div class="result-buttons">
+                <button class="start-btn" onclick="restartGame()">다시 하기</button>
+                <button class="end-btn" onclick="endGame()">게임 종료</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 게임 설정
+        const CONFIG = {
+            TOTAL_ROUNDS: 6,
+            TOTAL_QUIZZES: 6
+        };
+
+        // 게임 상태
+        let gameState = {
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            round: 1,
+            quizzesPassed: 0,
+            fairness: 100,
+            totalFairness: 0,
+            currentQuiz: null,
+            usedQuizIndices: [],
+            screenFlash: null,
+            feedbackMessage: null // 피드백 메시지
+        };
+
+        // 캔버스
+        let canvas, ctx;
+        let canvasWidth, canvasHeight;
+
+        // 게임 오브젝트
+        let citizens = [];
+        let taxCoins = [];
+        let draggedCoin = null;
+        let sesim = null;
+        let particles = [];
+        let checkButton = null;
+
+        // 시민 데이터 (라운드별)
+        const roundData = [
+            // 라운드 1: 수직적 형평성 기본
+            {
+                title: '수직적 형평성',
+                description: '소득이 많으면 세금도 많이!',
+                citizens: [
+                    { name: '김부자', income: 5000, correctTax: 3, emoji: '🧑‍💼' },
+                    { name: '이중산', income: 3000, correctTax: 2, emoji: '👨‍🔧' },
+                    { name: '박서민', income: 1000, correctTax: 1, emoji: '👩‍🌾' }
+                ],
+                totalCoins: 6
+            },
+            // 라운드 2: 수평적 형평성
+            {
+                title: '수평적 형평성',
+                description: '소득이 같으면 세금도 같게!',
+                citizens: [
+                    { name: '최회사', income: 3000, correctTax: 2, emoji: '👨‍💻' },
+                    { name: '정회사', income: 3000, correctTax: 2, emoji: '👩‍💻' },
+                    { name: '강자영', income: 3000, correctTax: 2, emoji: '🧑‍🍳' }
+                ],
+                totalCoins: 6
+            },
+            // 라운드 3: 혼합
+            {
+                title: '공평한 분배',
+                description: '소득에 따라 공평하게!',
+                citizens: [
+                    { name: '윤사장', income: 8000, correctTax: 4, emoji: '🧑‍💼' },
+                    { name: '임과장', income: 4000, correctTax: 2, emoji: '👨‍💼' },
+                    { name: '한대리', income: 2000, correctTax: 1, emoji: '👩‍💼' },
+                    { name: '오사원', income: 2000, correctTax: 1, emoji: '🧑‍🎓' }
+                ],
+                totalCoins: 8
+            },
+            // 라운드 4: 다양한 소득
+            {
+                title: '다양한 소득층',
+                description: '경제적 능력에 맞게!',
+                citizens: [
+                    { name: '재벌님', income: 10000, correctTax: 4, emoji: '🤵' },
+                    { name: '의사님', income: 5000, correctTax: 2, emoji: '👨‍⚕️' },
+                    { name: '선생님', income: 2500, correctTax: 1, emoji: '👩‍🏫' },
+                    { name: '학생', income: 500, correctTax: 0, emoji: '🧑‍🎓' }
+                ],
+                totalCoins: 7
+            },
+            // 라운드 5: 복잡한 분배
+            {
+                title: '조세의 효율성',
+                description: '적절하게 분배해요!',
+                citizens: [
+                    { name: '대기업', income: 6000, correctTax: 3, emoji: '🏢' },
+                    { name: '중기업', income: 4000, correctTax: 2, emoji: '🏭' },
+                    { name: '소기업', income: 2000, correctTax: 1, emoji: '🏪' },
+                    { name: '자영업', income: 2000, correctTax: 1, emoji: '🛒' }
+                ],
+                totalCoins: 7
+            },
+            // 라운드 6: 최종
+            {
+                title: '모두가 납득하는 세금',
+                description: '형평성의 완성!',
+                citizens: [
+                    { name: '고소득', income: 9000, correctTax: 4, emoji: '💎' },
+                    { name: '중소득A', income: 4500, correctTax: 2, emoji: '💼' },
+                    { name: '중소득B', income: 4500, correctTax: 2, emoji: '💼' },
+                    { name: '저소득', income: 1500, correctTax: 1, emoji: '🌱' }
+                ],
+                totalCoins: 9
+            }
+        ];
+
+        // 퀴즈 데이터
+        const quizzes = [
+            {
+                icon: '📊',
+                title: '수직적 형평성',
+                question: '수직적 형평성이란 경제적 능력이 클수록 더 많은 세금을 부담해야 한다는 원칙이다.',
+                answer: true,
+                explanation: '수직적 형평성은 사람마다 소득과 재산 수준이 다르다는 점을 고려하여, 소득과 재산이 많은 사람이 그렇지 않은 사람보다 더 많은 세금을 부담하도록 하는 원칙입니다. '
+            },
+            {
+                icon: '📊',
+                title: '수평적 형평성',
+                question: '수평적 형평성이란 경제적 능력이 비슷한 사람들은 비슷하게 세금을 내야 한다는 원칙이다.',
+                answer: true,
+                explanation: '수평적 형평성은 특별한 이유 없이 누구에게만 불리하거나 유리해서는 안 된다는 점을 고려하여, 동일한 경제적 능력을 가진 사람은 동일한 수준의 세금을 부담해야 한다는 원칙입니다.'
+            },
+            {
+                icon: '⚖️',
+                title: '공평한 세금',
+                question: '모든 국민이 똑같은 금액의 세금을 내는 것이 가장 공평하다.',
+                answer: false,
+                explanation: '공평이란 똑같이 나누는 것이 아니라 각자의 상황(소득과 재산)을 고려해 나누는 것입니다.'
+            },
+            {
+                icon: '💰',
+                title: '조세의 효율성',
+                question: '세금을 많이 걷을수록 항상 좋다.',
+                answer: false,
+                explanation: '과도한 세금은 소비와 투자를 줄여 경제를 위축시킬 수 있습니다.'
+            },
+            {
+                icon: '🏛️',
+                title: '세금의 역할',
+                question: '조세의 형평성은 사회적 불평등을 줄이는 데 도움이 된다.',
+                answer: true,
+                explanation: '수직적 형평성을 통해 소득과 부의 재분배가 이루어져 사회적 불평등을 줄일 수 있습니다.'
+            },
+            {
+                icon: '📋',
+                title: '납세의 기준',
+                question: '조세의 형평성은 모두가 납득할 수 있는 세금 제도를 만들기 위한 중요한 기준이다.',
+                answer: true,
+                explanation: '공평한 세금 제도가 있어야 국민들이 기꺼이 세금을 납부합니다.'
+            }
+        ];
+
+        // 초기화
+        function init() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 터치/마우스 이벤트
+            canvas.addEventListener('mousedown', handlePointerDown);
+            canvas.addEventListener('mousemove', handlePointerMove);
+            canvas.addEventListener('mouseup', handlePointerUp);
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
+            
+            // 게임 중이면 현재 라운드 요소 재배치
+            if (gameState.isPlaying && citizens.length > 0) {
+                const data = roundData[gameState.round - 1];
+                const isMobile = canvasHeight < 700;
+                const citizenWidth = Math.min(140, (canvasWidth - 40) / citizens.length - 10);
+                const startX = (canvasWidth - (citizenWidth + 10) * citizens.length) / 2;
+                const citizenY = isMobile ? canvasHeight - 190 : canvasHeight - 220;
+                
+                citizens.forEach((c, i) => {
+                    c.x = startX + i * (citizenWidth + 10);
+                    c.y = citizenY;
+                    c.width = citizenWidth;
+                });
+                
+                // 코인 위치 재배치 (드래그 중이 아닌 것만)
+                const coinY = isMobile ? 195 : 210;
+                const freeCoins = taxCoins.filter(c => !c.isDragging && !c.assignedTo);
+                const coinStartX = canvasWidth / 2 - (freeCoins.length * 30) / 2;
+                freeCoins.forEach((c, i) => {
+                    c.x = coinStartX + i * 35 + 20;
+                    c.y = coinY;
+                });
+                
+                // 버튼 재배치
+                const buttonY = isMobile ? canvasHeight - 35 : canvasHeight - 55;
+                if (checkButton) {
+                    checkButton.x = canvasWidth / 2 - 130;
+                    checkButton.y = buttonY;
+                }
+                if (resetButton) {
+                    resetButton.x = canvasWidth / 2 + 10;
+                    resetButton.y = buttonY;
+                }
+                
+                // 세심이 위치
+                if (sesim) {
+                    sesim.x = 70;
+                }
+            }
+        }
+
+        function handlePointerDown(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            checkInteraction(x, y);
+        }
+
+        function handlePointerMove(e) {
+            if (!gameState.isPlaying || gameState.isPaused || !draggedCoin) return;
+            const rect = canvas.getBoundingClientRect();
+            draggedCoin.x = e.clientX - rect.left;
+            draggedCoin.y = e.clientY - rect.top;
+        }
+
+        function handlePointerUp(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            handleDrop(x, y);
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            checkInteraction(x, y);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying || gameState.isPaused || !draggedCoin) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            draggedCoin.x = touch.clientX - rect.left;
+            draggedCoin.y = touch.clientY - rect.top;
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            if (draggedCoin) {
+                handleDrop(draggedCoin.x, draggedCoin.y);
+            }
+        }
+
+        function checkInteraction(x, y) {
+            // 확인 버튼 체크
+            if (checkButton && x >= checkButton.x && x <= checkButton.x + checkButton.width &&
+                y >= checkButton.y && y <= checkButton.y + checkButton.height) {
+                checkDistribution();
+                return;
+            }
+            
+            // 리셋 버튼 체크
+            if (resetButton && x >= resetButton.x && x <= resetButton.x + resetButton.width &&
+                y >= resetButton.y && y <= resetButton.y + resetButton.height) {
+                resetRound();
+                return;
+            }
+            
+            // 시민에게 배분된 코인 회수
+            for (const citizen of citizens) {
+                if (citizen.assignedCoins > 0) {
+                    if (x >= citizen.x && x <= citizen.x + citizen.width &&
+                        y >= citizen.y + 100 && y <= citizen.y + 150) {
+                        citizen.assignedCoins--;
+                        taxCoins.push({
+                            x: x,
+                            y: y,
+                            size: 25,
+                            isDragging: true
+                        });
+                        draggedCoin = taxCoins[taxCoins.length - 1];
+                        gameState.feedbackMessage = null;
+                        return;
+                    }
+                }
+            }
+            
+            // 세금 코인 드래그
+            for (let i = taxCoins.length - 1; i >= 0; i--) {
+                const coin = taxCoins[i];
+                const dist = Math.sqrt((x - coin.x) ** 2 + (y - coin.y) ** 2);
+                if (dist < coin.size) {
+                    draggedCoin = coin;
+                    draggedCoin.isDragging = true;
+                    gameState.feedbackMessage = null;
+                    return;
+                }
+            }
+        }
+
+        function handleDrop(x, y) {
+            if (!draggedCoin) return;
+            
+            // 시민에게 드롭
+            for (const citizen of citizens) {
+                if (x >= citizen.x - 10 && x <= citizen.x + citizen.width + 10 &&
+                    y >= citizen.y - 10 && y <= citizen.y + citizen.height + 10) {
+                    citizen.assignedCoins++;
+                    const idx = taxCoins.indexOf(draggedCoin);
+                    if (idx > -1) taxCoins.splice(idx, 1);
+                    createParticles(citizen.x + citizen.width/2, citizen.y + citizen.height/2, '#FFD700', 8);
+                    draggedCoin = null;
+                    return;
+                }
+            }
+            
+            draggedCoin.isDragging = false;
+            draggedCoin = null;
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('active');
+            
+            resetGameState();
+            setupRound();
+            createSesim();
+            
+            gameState.isPlaying = true;
+            updateHUD();
+            gameLoop();
+        }
+
+        function resetGameState() {
+            gameState.score = 0;
+            gameState.round = 1;
+            gameState.quizzesPassed = 0;
+            gameState.fairness = 100;
+            gameState.totalFairness = 0;
+            gameState.isPaused = false;
+            gameState.currentQuiz = null;
+            gameState.usedQuizIndices = [];
+            gameState.screenFlash = null;
+            gameState.feedbackMessage = null;
+            citizens = [];
+            taxCoins = [];
+            particles = [];
+            draggedCoin = null;
+        }
+
+        // 리셋 버튼
+        let resetButton = null;
+        
+        function setupRound() {
+            const data = roundData[gameState.round - 1];
+            citizens = [];
+            taxCoins = [];
+            
+            // 반응형 레이아웃 계산
+            const isMobile = canvasHeight < 700;
+            const citizenWidth = Math.min(140, (canvasWidth - 40) / data.citizens.length - 10);
+            const startX = (canvasWidth - (citizenWidth + 10) * data.citizens.length) / 2;
+            const citizenY = isMobile ? canvasHeight - 190 : canvasHeight - 220;
+            
+            data.citizens.forEach((c, i) => {
+                citizens.push({
+                    ...c,
+                    x: startX + i * (citizenWidth + 10),
+                    y: citizenY,
+                    width: citizenWidth,
+                    height: 150,
+                    assignedCoins: 0
+                });
+            });
+            
+            // 세금 코인 생성 - 위치 조정
+            const coinY = isMobile ? 195 : 210;
+            const coinStartX = canvasWidth / 2 - (data.totalCoins * 30) / 2;
+            for (let i = 0; i < data.totalCoins; i++) {
+                taxCoins.push({
+                    x: coinStartX + i * 35 + 20,
+                    y: coinY,
+                    size: 25,
+                    isDragging: false
+                });
+            }
+            
+            // 확인 버튼 - 반응형 위치
+            const buttonY = isMobile ? canvasHeight - 35 : canvasHeight - 55;
+            checkButton = {
+                x: canvasWidth / 2 - 130,
+                y: buttonY,
+                width: 120,
+                height: 40
+            };
+            
+            // 리셋 버튼
+            resetButton = {
+                x: canvasWidth / 2 + 10,
+                y: buttonY,
+                width: 120,
+                height: 40
+            };
+        }
+
+        function createSesim() {
+            sesim = {
+                x: 70,
+                y: 130,
+                size: 45,
+                wingAngle: 0,
+                floatOffset: 0
+            };
+        }
+
+        function checkDistribution() {
+            let correct = true;
+            let totalDiff = 0;
+            let hints = [];
+            
+            for (const citizen of citizens) {
+                const diff = citizen.assignedCoins - citizen.correctTax;
+                totalDiff += Math.abs(diff);
+                if (diff !== 0) {
+                    correct = false;
+                    if (diff > 0) {
+                        hints.push(`${citizen.name}에게 너무 많이!`);
+                    } else {
+                        hints.push(`${citizen.name}에게 더 필요해요!`);
+                    }
+                }
+            }
+            
+            // 남은 코인 체크
+            if (taxCoins.length > 0) {
+                correct = false;
+                hints.push(`코인 ${taxCoins.length}개가 남았어요!`);
+            }
+            
+            if (correct) {
+                // 정답!
+                gameState.score += 50;
+                gameState.fairness = 100;
+                gameState.totalFairness += 100;
+                gameState.screenFlash = { color: 'rgba(76, 175, 80, 0.3)', time: 15 };
+                gameState.feedbackMessage = null;
+                createParticles(canvasWidth / 2, canvasHeight / 2, '#4CAF50', 20);
+                
+                // 퀴즈 표시
+                setTimeout(() => showQuiz(), 500);
+            } else {
+                // 오답 - 힌트 표시
+                gameState.fairness = Math.max(0, 100 - totalDiff * 20);
+                gameState.screenFlash = { color: 'rgba(244, 67, 54, 0.4)', time: 20 };
+                gameState.feedbackMessage = {
+                    text: hints.slice(0, 2).join(' '),
+                    time: 180 // 3초간 표시
+                };
+            }
+            
+            updateHUD();
+        }
+        
+        function resetRound() {
+            // 현재 라운드 다시 설정
+            setupRound();
+            gameState.feedbackMessage = null;
+            updateHUD();
+        }
+
+        function showQuiz() {
+            gameState.isPaused = true;
+            
+            let quizIndex;
+            if (gameState.round <= quizzes.length) {
+                quizIndex = gameState.round - 1;
+            } else {
+                quizIndex = Math.floor(Math.random() * quizzes.length);
+            }
+            
+            const quiz = quizzes[quizIndex];
+            gameState.currentQuiz = { ...quiz, index: quizIndex };
+            
+            document.getElementById('quiz-icon').textContent = quiz.icon;
+            document.getElementById('quiz-title').textContent = quiz.title;
+            document.getElementById('quiz-question').textContent = quiz.question;
+            document.getElementById('quiz-result').className = 'quiz-result';
+            document.getElementById('quiz-result').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+            
+            document.getElementById('quiz-modal').classList.add('active');
+        }
+
+        function answerQuiz(answer) {
+            const quiz = gameState.currentQuiz;
+            const resultDiv = document.getElementById('quiz-result');
+            const buttonsDiv = document.getElementById('quiz-buttons');
+            
+            if (answer === quiz.answer) {
+                resultDiv.className = 'quiz-result correct';
+                resultDiv.innerHTML = `
+                    <p>🎉 정답이에요!</p>
+                    <p style="margin-top: 6px; font-weight: normal; font-size: 0.9em;">${quiz.explanation}</p>
+                    <button class="result-btn continue" onclick="closeQuiz(true)">다음 라운드</button>
+                `;
+                buttonsDiv.style.display = 'none';
+            } else {
+                resultDiv.className = 'quiz-result wrong';
+                resultDiv.innerHTML = `
+                    <p>❌ 틀렸어요!</p>
+                    <p style="margin-top: 6px; font-weight: normal; font-size: 0.9em;">다시 생각해보세요!</p>
+                    <button class="result-btn retry" onclick="retryQuiz()">다시 풀기</button>
+                `;
+                buttonsDiv.style.display = 'none';
+            }
+        }
+
+        function retryQuiz() {
+            document.getElementById('quiz-result').className = 'quiz-result';
+            document.getElementById('quiz-result').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+        }
+
+        function closeQuiz(success) {
+            document.getElementById('quiz-modal').classList.remove('active');
+            
+            if (success) {
+                gameState.quizzesPassed++;
+                gameState.score += 30;
+                
+                if (gameState.round >= CONFIG.TOTAL_ROUNDS) {
+                    // 게임 클리어
+                    setTimeout(() => gameOver(true), 300);
+                } else {
+                    // 다음 라운드
+                    gameState.round++;
+                    setupRound();
+                    updateHUD();
+                }
+            }
+            
+            gameState.isPaused = false;
+            gameState.currentQuiz = null;
+        }
+
+        function restartGame() {
+            document.getElementById('result-screen').classList.remove('active', 'win', 'lose');
+            document.getElementById('game-screen').classList.add('active');
+            
+            resetGameState();
+            setupRound();
+            createSesim();
+            
+            gameState.isPlaying = true;
+            updateHUD();
+            gameLoop(); // 게임 루프 재시작
+        }
+
+        function gameOver(isWin) {
+            gameState.isPlaying = false;
+            
+            document.getElementById('game-screen').classList.remove('active');
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.add('active');
+            resultScreen.classList.add(isWin ? 'win' : 'lose');
+            
+            document.getElementById('result-title').textContent = isWin ? '🎉 게임 클리어!' : '😢 게임 오버';
+            document.getElementById('final-quiz').textContent = gameState.quizzesPassed;
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-fairness').textContent = Math.round(gameState.totalFairness / gameState.round);
+            
+            document.getElementById('achievement-badge').textContent = isWin ? '🏆 공정한 세무사!' : '다시 도전해보세요!';
+        }
+
+        function updateHUD() {
+            document.getElementById('round-display').textContent = `라운드 ${gameState.round}/${CONFIG.TOTAL_ROUNDS}`;
+            document.getElementById('score-display').textContent = gameState.score;
+            document.getElementById('quiz-display').textContent = `${gameState.quizzesPassed}/${CONFIG.TOTAL_QUIZZES}`;
+            document.getElementById('fairness-display').textContent = `공정도: ${gameState.fairness}%`;
+        }
+
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 3,
+                    color: color,
+                    size: Math.random() * 6 + 3,
+                    life: 40
+                });
+            }
+        }
+
+        // 일시 정지 토글
+        function togglePause() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.isPaused = !gameState.isPaused;
+            const pauseOverlay = document.getElementById('pause-overlay');
+            const pauseBtn = document.getElementById('pause-btn');
+            
+            if (gameState.isPaused) {
+                pauseOverlay.classList.add('active');
+                pauseBtn.textContent = '계속하기';
+            } else {
+                pauseOverlay.classList.remove('active');
+                pauseBtn.textContent = '일시정지';
+            }
+        }
+        
+        // 처음으로 돌아가기
+        function quitToStart() {
+            gameState.isPlaying = false;
+            gameState.isPaused = false;
+            
+            document.getElementById('pause-overlay').classList.remove('active');
+            document.getElementById('pause-btn').textContent = '일시정지';
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+        
+        // 게임 종료 (브라우저 탭/창 닫기)
+        function endGame() {
+            if (confirm('정말 게임을 종료하시겠습니까?')) {
+                window.close();
+                // window.close()가 작동하지 않는 경우 (보안 정책)
+                // 빈 페이지로 이동하거나 안내 메시지 표시
+                setTimeout(() => {
+                    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#1a1a2e;color:#fff;font-family:sans-serif;text-align:center;padding:20px;"><div><h2>게임이 종료되었습니다</h2><p style="margin-top:10px;color:#aaa;">브라우저 탭을 닫아주세요.</p></div></div>';
+                }, 100);
+            }
+        }
+
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+            
+            update();
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            // 세심이 애니메이션
+            if (sesim) {
+                sesim.wingAngle += 0.3;
+                sesim.floatOffset = Math.sin(Date.now() * 0.003) * 5;
+            }
+            
+            // 파티클 업데이트
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.15;
+                p.life--;
+                return p.life > 0;
+            });
+        }
+
+        function draw() {
+            // 배경
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+            gradient.addColorStop(0, '#FFF8E1');
+            gradient.addColorStop(0.5, '#FFECB3');
+            gradient.addColorStop(1, '#FFE082');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 라운드 정보
+            drawRoundInfo();
+            
+            // 세심이
+            if (sesim) drawSesim();
+            
+            // 세금 코인 영역
+            drawCoinArea();
+            
+            // 시민들
+            citizens.forEach(citizen => drawCitizen(citizen));
+            
+            // 세금 코인
+            taxCoins.forEach(coin => drawCoin(coin));
+            
+            // 확인 버튼
+            drawCheckButton();
+            
+            // 리셋 버튼
+            drawResetButton();
+            
+            // 피드백 메시지
+            drawFeedbackMessage();
+            
+            // 파티클
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life / 40;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            
+            // 화면 플래시 효과
+            if (gameState.screenFlash && gameState.screenFlash.time > 0) {
+                ctx.fillStyle = gameState.screenFlash.color;
+                ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+                gameState.screenFlash.time--;
+                if (gameState.screenFlash.time <= 0) {
+                    gameState.screenFlash = null;
+                }
+            }
+        }
+
+        function drawRoundInfo() {
+            const data = roundData[gameState.round - 1];
+            
+            ctx.fillStyle = '#E65100';
+            ctx.font = 'bold 20px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.fillText(data.title, canvasWidth / 2, 80);
+            
+            ctx.fillStyle = '#F57C00';
+            ctx.font = '14px Noto Sans KR';
+            ctx.fillText(data.description, canvasWidth / 2, 105);
+        }
+
+        function drawCoinArea() {
+            const isMobile = canvasHeight < 700;
+            const areaY = isMobile ? 125 : 140;
+            const areaHeight = isMobile ? 90 : 100;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.beginPath();
+            ctx.roundRect(canvasWidth / 2 - 150, areaY, 300, areaHeight, 15);
+            ctx.fill();
+            ctx.strokeStyle = '#FFB74D';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.fillStyle = '#E65100';
+            ctx.font = 'bold 12px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.fillText('💰 세금 코인을 시민에게 분배하세요!', canvasWidth / 2, areaY + 18);
+        }
+
+        function drawSesim() {
+            const x = sesim.x;
+            const y = sesim.y + sesim.floatOffset;
+            const size = sesim.size;
+            
+            ctx.save();
+            
+            // 날개
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.strokeStyle = 'rgba(150, 150, 150, 0.4)';
+            ctx.lineWidth = 2;
+            
+            const wingOffset = Math.sin(sesim.wingAngle) * 4;
+            
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.7, y + wingOffset, size * 0.3, size * 0.45, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.ellipse(x + size * 0.7, y - wingOffset, size * 0.3, size * 0.45, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // 몸통
+            ctx.beginPath();
+            ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#4A3728';
+            ctx.fill();
+            ctx.strokeStyle = '#3D2E1F';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 노란 배
+            ctx.beginPath();
+            ctx.arc(x, y + size * 0.12, size * 0.4, 0.2, Math.PI - 0.2);
+            ctx.fillStyle = '#FFD93D';
+            ctx.fill();
+            
+            // 얼굴
+            ctx.beginPath();
+            ctx.ellipse(x, y - size * 0.1, size * 0.35, size * 0.28, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFE4B5';
+            ctx.fill();
+            
+            // 눈
+            ctx.fillStyle = '#2D2D2D';
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.13, y - size * 0.13, size * 0.06, size * 0.08, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + size * 0.13, y - size * 0.13, size * 0.06, size * 0.08, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 볼터치
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(x - size * 0.25, y - size * 0.03, size * 0.07, size * 0.04, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + size * 0.25, y - size * 0.03, size * 0.07, size * 0.04, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 입
+            ctx.fillStyle = '#E85A4F';
+            ctx.beginPath();
+            ctx.arc(x, y + size * 0.02, size * 0.07, 0, Math.PI);
+            ctx.fill();
+            
+            // 더듬이
+            ctx.strokeStyle = '#4A3728';
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(x - size * 0.12, y - size * 0.38);
+            ctx.lineTo(x - size * 0.2, y - size * 0.6);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + size * 0.12, y - size * 0.38);
+            ctx.lineTo(x + size * 0.2, y - size * 0.6);
+            ctx.stroke();
+            
+            // 더듬이 끝 공
+            ctx.fillStyle = '#FFD93D';
+            ctx.strokeStyle = '#4A3728';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(x - size * 0.2, y - size * 0.62, size * 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x + size * 0.2, y - size * 0.62, size * 0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+
+        function drawCitizen(citizen) {
+            // 카드 배경
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.roundRect(citizen.x, citizen.y, citizen.width, citizen.height, 12);
+            ctx.fill();
+            ctx.strokeStyle = '#FFB74D';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 이모지
+            ctx.font = '35px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(citizen.emoji, citizen.x + citizen.width / 2, citizen.y + 45);
+            
+            // 이름
+            ctx.fillStyle = '#4A3728';
+            ctx.font = 'bold 13px Noto Sans KR';
+            ctx.fillText(citizen.name, citizen.x + citizen.width / 2, citizen.y + 70);
+            
+            // 소득
+            ctx.fillStyle = '#E65100';
+            ctx.font = '11px Noto Sans KR';
+            ctx.fillText(`소득: ${citizen.income.toLocaleString()}만원`, citizen.x + citizen.width / 2, citizen.y + 90);
+            
+            // 배분된 세금 코인
+            if (citizen.assignedCoins > 0) {
+                ctx.fillStyle = '#FFF8E1';
+                ctx.beginPath();
+                ctx.roundRect(citizen.x + 10, citizen.y + 100, citizen.width - 20, 40, 8);
+                ctx.fill();
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.font = '22px sans-serif';
+                ctx.fillText('💰'.repeat(Math.min(citizen.assignedCoins, 4)), citizen.x + citizen.width / 2, citizen.y + 128);
+                
+                if (citizen.assignedCoins > 4) {
+                    ctx.fillStyle = '#E65100';
+                    ctx.font = 'bold 12px Noto Sans KR';
+                    ctx.fillText(`x${citizen.assignedCoins}`, citizen.x + citizen.width - 20, citizen.y + 115);
+                }
+            } else {
+                ctx.fillStyle = '#EEE';
+                ctx.beginPath();
+                ctx.roundRect(citizen.x + 10, citizen.y + 100, citizen.width - 20, 40, 8);
+                ctx.fill();
+                
+                ctx.fillStyle = '#AAA';
+                ctx.font = '11px Noto Sans KR';
+                ctx.fillText('세금 배분 대기', citizen.x + citizen.width / 2, citizen.y + 125);
+            }
+        }
+
+        function drawCoin(coin) {
+            ctx.save();
+            
+            // 글로우
+            const gradient = ctx.createRadialGradient(coin.x, coin.y, 0, coin.x, coin.y, coin.size + 10);
+            gradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(coin.x, coin.y, coin.size + 10, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 코인
+            ctx.beginPath();
+            ctx.arc(coin.x, coin.y, coin.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFD700';
+            ctx.fill();
+            ctx.strokeStyle = '#FFA000';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 세금 마크
+            ctx.fillStyle = '#E65100';
+            ctx.font = 'bold 16px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('₩', coin.x, coin.y);
+            
+            ctx.restore();
+        }
+
+        function drawCheckButton() {
+            if (!checkButton) return;
+            
+            // 그림자
+            ctx.fillStyle = '#388E3C';
+            ctx.beginPath();
+            ctx.roundRect(checkButton.x, checkButton.y + 4, checkButton.width, checkButton.height, 20);
+            ctx.fill();
+            
+            // 버튼 본체
+            ctx.fillStyle = '#4CAF50';
+            ctx.beginPath();
+            ctx.roundRect(checkButton.x, checkButton.y, checkButton.width, checkButton.height, 20);
+            ctx.fill();
+            
+            // 텍스트
+            ctx.fillStyle = '#FFF';
+            ctx.font = 'bold 16px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('✓ 확인', checkButton.x + checkButton.width / 2, checkButton.y + checkButton.height / 2);
+        }
+        
+        function drawResetButton() {
+            if (!resetButton) return;
+            
+            // 그림자
+            ctx.fillStyle = '#F57C00';
+            ctx.beginPath();
+            ctx.roundRect(resetButton.x, resetButton.y + 4, resetButton.width, resetButton.height, 20);
+            ctx.fill();
+            
+            // 버튼 본체
+            ctx.fillStyle = '#FF9800';
+            ctx.beginPath();
+            ctx.roundRect(resetButton.x, resetButton.y, resetButton.width, resetButton.height, 20);
+            ctx.fill();
+            
+            // 텍스트
+            ctx.fillStyle = '#FFF';
+            ctx.font = 'bold 16px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('↺ 다시', resetButton.x + resetButton.width / 2, resetButton.y + resetButton.height / 2);
+        }
+        
+        function drawFeedbackMessage() {
+            if (!gameState.feedbackMessage || gameState.feedbackMessage.time <= 0) return;
+            
+            gameState.feedbackMessage.time--;
+            
+            const alpha = Math.min(1, gameState.feedbackMessage.time / 30);
+            
+            // 배경
+            ctx.fillStyle = `rgba(244, 67, 54, ${0.9 * alpha})`;
+            ctx.beginPath();
+            ctx.roundRect(canvasWidth / 2 - 160, canvasHeight / 2 - 30, 320, 60, 15);
+            ctx.fill();
+            
+            // 테두리
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 * alpha})`;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 텍스트
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.font = 'bold 16px Noto Sans KR';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('❌ ' + gameState.feedbackMessage.text, canvasWidth / 2, canvasHeight / 2 - 5);
+            ctx.font = '13px Noto Sans KR';
+            ctx.fillText('코인을 터치하여 회수하거나 [다시] 버튼을 누르세요', canvasWidth / 2, canvasHeight / 2 + 18);
+            
+            if (gameState.feedbackMessage.time <= 0) {
+                gameState.feedbackMessage = null;
+            }
+        }
+
+        // 시작
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

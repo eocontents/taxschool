@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>납세 히어로 - 세심이의 성실납세 대작전</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 시작 화면 */
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #4CAF50 0%, #2E7D32 50%, #1B5E20 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        
+        #start-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        
+        .game-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2.2rem, 7vw, 4rem);
+            color: #FFF;
+            text-shadow: 3px 3px 0 #1B5E20, 5px 5px 0 rgba(0,0,0,0.3);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .game-subtitle {
+            font-size: clamp(0.95rem, 2.8vw, 1.4rem);
+            color: #C8E6C9;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        /* 세심이 캐릭터 */
+        .sesim-character {
+            width: 100px;
+            height: 120px;
+            position: relative;
+            margin: 15px auto;
+            animation: float 2s ease-in-out infinite;
+        }
+        
+        .sesim-character.small {
+            width: 70px;
+            height: 85px;
+            margin: 10px auto;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .sesim-body {
+            width: 85px;
+            height: 85px;
+            background: linear-gradient(180deg, #4A3728 0%, #4A3728 45%, #FFD93D 45%, #FFD93D 100%);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 3px solid #3D2E1F;
+        }
+        
+        .sesim-character.small .sesim-body {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .sesim-face {
+            width: 60px;
+            height: 42px;
+            background: #FFE4B5;
+            border-radius: 50%;
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .sesim-character.small .sesim-face {
+            width: 42px;
+            height: 30px;
+            top: 8px;
+        }
+        
+        .sesim-eye {
+            width: 7px;
+            height: 9px;
+            background: #2D2D2D;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+        }
+        
+        .sesim-eye.left { left: 15px; }
+        .sesim-eye.right { right: 15px; }
+        
+        .sesim-character.small .sesim-eye {
+            width: 5px;
+            height: 6px;
+            top: 10px;
+        }
+        
+        .sesim-character.small .sesim-eye.left { left: 10px; }
+        .sesim-character.small .sesim-eye.right { right: 10px; }
+        
+        .sesim-mouth {
+            width: 12px;
+            height: 8px;
+            background: #E85A4F;
+            border-radius: 0 0 10px 10px;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .sesim-character.small .sesim-mouth {
+            width: 8px;
+            height: 5px;
+            bottom: 7px;
+        }
+        
+        .sesim-cheek {
+            width: 10px;
+            height: 6px;
+            background: #FFB6C1;
+            border-radius: 50%;
+            position: absolute;
+            top: 24px;
+            opacity: 0.7;
+        }
+        
+        .sesim-cheek.left { left: 6px; }
+        .sesim-cheek.right { right: 6px; }
+        
+        .sesim-character.small .sesim-cheek {
+            width: 7px;
+            height: 4px;
+            top: 17px;
+        }
+        
+        .sesim-character.small .sesim-cheek.left { left: 4px; }
+        .sesim-character.small .sesim-cheek.right { right: 4px; }
+        
+        .sesim-antenna {
+            width: 3px;
+            height: 25px;
+            background: #4A3728;
+            position: absolute;
+            top: -20px;
+            border-radius: 2px;
+        }
+        
+        .sesim-antenna.left { left: 30px; transform: rotate(-15deg); }
+        .sesim-antenna.right { right: 30px; transform: rotate(15deg); }
+        
+        .sesim-character.small .sesim-antenna {
+            width: 2px;
+            height: 18px;
+            top: -15px;
+        }
+        
+        .sesim-character.small .sesim-antenna.left { left: 20px; }
+        .sesim-character.small .sesim-antenna.right { right: 20px; }
+        
+        .sesim-antenna-ball {
+            width: 12px;
+            height: 12px;
+            background: #FFD93D;
+            border-radius: 50%;
+            position: absolute;
+            top: -7px;
+            left: -4.5px;
+            border: 2px solid #4A3728;
+        }
+        
+        .sesim-character.small .sesim-antenna-ball {
+            width: 8px;
+            height: 8px;
+            top: -5px;
+            left: -3px;
+        }
+        
+        .sesim-wing {
+            width: 30px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 25px;
+            border: 2px solid rgba(150, 150, 150, 0.3);
+            animation: wingFlap 0.15s ease-in-out infinite alternate;
+        }
+        
+        .sesim-wing.left { left: -17px; transform: rotate(-20deg); }
+        .sesim-wing.right { right: -17px; transform: rotate(20deg); animation-delay: 0.075s; }
+        
+        .sesim-character.small .sesim-wing {
+            width: 20px;
+            height: 26px;
+            top: 18px;
+        }
+        
+        .sesim-character.small .sesim-wing.left { left: -12px; }
+        .sesim-character.small .sesim-wing.right { right: -12px; }
+        
+        @keyframes wingFlap {
+            0% { transform: rotate(-20deg) scaleY(1); }
+            100% { transform: rotate(-30deg) scaleY(0.9); }
+        }
+        
+        .sesim-badge {
+            width: 22px;
+            height: 15px;
+            background: #FFF;
+            border: 1px solid #CCC;
+            position: absolute;
+            bottom: 17px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            font-size: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .sesim-character.small .sesim-badge {
+            width: 16px;
+            height: 11px;
+            bottom: 12px;
+            font-size: 4px;
+        }
+        
+        .start-btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+            padding: 12px 50px;
+            background: linear-gradient(180deg, #FFD700 0%, #FFA000 100%);
+            color: #4A3728;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #FF8F00, 0 7px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            margin-top: 15px;
+        }
+        
+        .start-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #FF8F00, 0 3px 8px rgba(0,0,0,0.3);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            color: #E8F5E9;
+            font-size: clamp(0.8rem, 2.2vw, 1rem);
+            line-height: 1.7;
+            background: rgba(0,0,0,0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            max-width: 90%;
+        }
+        
+        .instructions strong {
+            color: #FFD700;
+        }
+        
+        /* 게임 화면 */
+        #game-screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            position: relative;
+            background: linear-gradient(180deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+        }
+        
+        #game-screen.active {
+            display: block;
+        }
+        
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 700;
+            color: #333;
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+        }
+        
+        .hud-icon {
+            font-size: clamp(0.9rem, 2.2vw, 1.1rem);
+        }
+        
+        /* 신뢰도 게이지 */
+        #trust-gauge-container {
+            width: clamp(60px, 15vw, 100px);
+            height: 16px;
+            background: #DDD;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #999;
+        }
+        
+        #trust-gauge {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 100%;
+            transition: width 0.3s;
+            border-radius: 6px;
+        }
+        
+        /* OX 퀴즈 모달 */
+        #quiz-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        #quiz-modal.active {
+            display: flex;
+        }
+        
+        .quiz-box {
+            background: linear-gradient(180deg, #FFF9E6 0%, #FFF 100%);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 92%;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            border: 4px solid #FFD700;
+            animation: popIn 0.3s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .quiz-icon {
+            font-size: clamp(2rem, 6vw, 2.8rem);
+        }
+        
+        .quiz-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+            color: #4A3728;
+        }
+        
+        .quiz-question {
+            font-size: clamp(0.95rem, 2.8vw, 1.2rem);
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 18px;
+            padding: 12px;
+            background: #FFF;
+            border-radius: 12px;
+            border: 2px solid #EEE;
+        }
+        
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .quiz-btn {
+            width: clamp(65px, 16vw, 90px);
+            height: clamp(65px, 16vw, 90px);
+            border-radius: 50%;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+        
+        .quiz-btn.o-btn {
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+        }
+        
+        .quiz-btn.x-btn {
+            background: linear-gradient(180deg, #F44336 0%, #D32F2F 100%);
+            color: white;
+        }
+        
+        .quiz-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+        }
+        
+        .quiz-result {
+            display: none;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-size: clamp(0.85rem, 2.3vw, 1rem);
+            font-weight: 700;
+        }
+        
+        .quiz-result.correct {
+            display: block;
+            background: #E8F5E9;
+            color: #2E7D32;
+            border: 2px solid #4CAF50;
+        }
+        
+        .quiz-result.wrong {
+            display: block;
+            background: #FFEBEE;
+            color: #C62828;
+            border: 2px solid #F44336;
+        }
+        
+        .result-btn {
+            margin-top: 10px;
+            padding: 10px 22px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: clamp(0.85rem, 2.3vw, 1rem);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+        }
+        
+        .result-btn.retry {
+            background: #FF9800;
+            box-shadow: 0 3px 0 #F57C00;
+        }
+        
+        .result-btn.continue {
+            background: #4CAF50;
+            box-shadow: 0 3px 0 #388E3C;
+        }
+        
+        .result-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+        
+        /* 결과 화면 */
+        #result-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        #result-screen.active {
+            display: flex;
+        }
+        
+        #result-screen.win {
+            background: linear-gradient(180deg, #FFE66D 0%, #FFB347 100%);
+        }
+        
+        #result-screen.lose {
+            background: linear-gradient(180deg, #546E7A 0%, #37474F 100%);
+        }
+        
+        .result-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 6.5vw, 3.2rem);
+            margin-bottom: 10px;
+            animation: bounce 0.6s ease-in-out infinite;
+        }
+        
+        #result-screen.win .result-title {
+            color: #4A3728;
+            text-shadow: 3px 3px 0 #FFE66D;
+        }
+        
+        #result-screen.lose .result-title {
+            color: #FFF;
+            text-shadow: 3px 3px 0 #263238;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .result-stats {
+            background: rgba(255,255,255,0.92);
+            padding: 18px 30px;
+            border-radius: 16px;
+            margin: 12px 0;
+            text-align: center;
+        }
+        
+        .stat-row {
+            font-size: clamp(0.95rem, 2.7vw, 1.2rem);
+            color: #4A3728;
+            margin: 6px 0;
+            font-weight: 700;
+        }
+        
+        .achievement-badge {
+            background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+            color: #4A3728;
+            padding: 10px 22px;
+            border-radius: 22px;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: clamp(1rem, 2.8vw, 1.3rem);
+            margin-top: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* 일시 정지 버튼 */
+        #pause-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%);
+            border: none;
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #E65100;
+            z-index: 20;
+            transition: all 0.1s;
+        }
+        
+        #pause-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 #E65100;
+        }
+        
+        /* 일시 정지 화면 */
+        #pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+        }
+        
+        #pause-overlay.active {
+            display: flex;
+        }
+        
+        .pause-text {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 6vw, 3rem);
+            color: #FFF;
+            margin-bottom: 20px;
+        }
+        
+        .resume-btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: clamp(1.1rem, 3vw, 1.4rem);
+            padding: 12px 40px;
+            background: linear-gradient(180deg, #4CAF50 0%, #388E3C 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #2E7D32, 0 6px 15px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+        
+        .resume-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #2E7D32, 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        /* 게임 종료 버튼 */
+        .end-btn {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-weight: 600;
+            font-size: clamp(1rem, 2.8vw, 1.3rem);
+            padding: 10px 30px;
+            background: linear-gradient(180deg, #78909C 0%, #546E7A 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #455A64, 0 6px 12px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+            margin-top: 10px;
+        }
+        
+        .end-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #455A64, 0 2px 6px rgba(0,0,0,0.3);
+        }
+        
+        /* 결과 화면 버튼 컨테이너 */
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        /* 모바일 반응형 개선 */
+        @media screen and (max-height: 700px) {
+            .sesim-character {
+                width: 80px;
+                height: 96px;
+                margin: 10px auto;
+            }
+            
+            .sesim-character .sesim-body {
+                width: 68px;
+                height: 68px;
+            }
+            
+            .sesim-character .sesim-face {
+                width: 48px;
+                height: 34px;
+                top: 10px;
+            }
+            
+            .sesim-character .sesim-eye {
+                width: 6px;
+                height: 7px;
+                top: 12px;
+            }
+            
+            .sesim-character .sesim-eye.left { left: 12px; }
+            .sesim-character .sesim-eye.right { right: 12px; }
+            
+            .sesim-character .sesim-mouth {
+                width: 10px;
+                height: 6px;
+                bottom: 8px;
+            }
+            
+            .sesim-character .sesim-cheek {
+                width: 8px;
+                height: 5px;
+                top: 20px;
+            }
+            
+            .sesim-character .sesim-cheek.left { left: 5px; }
+            .sesim-character .sesim-cheek.right { right: 5px; }
+            
+            .sesim-character .sesim-antenna {
+                width: 2.5px;
+                height: 20px;
+                top: -16px;
+            }
+            
+            .sesim-character .sesim-antenna.left { left: 24px; }
+            .sesim-character .sesim-antenna.right { right: 24px; }
+            
+            .sesim-character .sesim-antenna-ball {
+                width: 10px;
+                height: 10px;
+                top: -6px;
+                left: -3.75px;
+            }
+            
+            .sesim-character .sesim-wing {
+                width: 24px;
+                height: 30px;
+                top: 20px;
+            }
+            
+            .sesim-character .sesim-wing.left { left: -14px; }
+            .sesim-character .sesim-wing.right { right: -14px; }
+            
+            .sesim-character .sesim-badge {
+                width: 18px;
+                height: 12px;
+                bottom: 14px;
+                font-size: 4px;
+            }
+            
+            .instructions {
+                margin-top: 12px;
+                padding: 10px 15px;
+                font-size: clamp(0.7rem, 2vw, 0.9rem);
+                line-height: 1.5;
+            }
+            
+            .game-subtitle {
+                margin-bottom: 8px;
+            }
+            
+            .start-btn {
+                padding: 10px 40px;
+                margin-top: 10px;
+            }
+        }
+        
+        @media screen and (max-height: 600px) {
+            .game-title {
+                font-size: clamp(1.8rem, 6vw, 2.5rem);
+                margin-bottom: 3px;
+            }
+            
+            .game-subtitle {
+                font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+                margin-bottom: 5px;
+            }
+            
+            .sesim-character {
+                width: 60px;
+                height: 72px;
+                margin: 8px auto;
+            }
+            
+            .sesim-character .sesim-body {
+                width: 51px;
+                height: 51px;
+            }
+            
+            .sesim-character .sesim-face {
+                width: 36px;
+                height: 25px;
+                top: 7px;
+            }
+            
+            .sesim-character .sesim-eye {
+                width: 4px;
+                height: 5px;
+                top: 9px;
+            }
+            
+            .sesim-character .sesim-eye.left { left: 9px; }
+            .sesim-character .sesim-eye.right { right: 9px; }
+            
+            .sesim-character .sesim-mouth {
+                width: 7px;
+                height: 4px;
+                bottom: 6px;
+            }
+            
+            .sesim-character .sesim-cheek {
+                width: 6px;
+                height: 3px;
+                top: 15px;
+            }
+            
+            .sesim-character .sesim-cheek.left { left: 3px; }
+            .sesim-character .sesim-cheek.right { right: 3px; }
+            
+            .sesim-character .sesim-antenna {
+                width: 2px;
+                height: 15px;
+                top: -12px;
+            }
+            
+            .sesim-character .sesim-antenna.left { left: 18px; }
+            .sesim-character .sesim-antenna.right { right: 18px; }
+            
+            .sesim-character .sesim-antenna-ball {
+                width: 7px;
+                height: 7px;
+                top: -4px;
+                left: -2.5px;
+            }
+            
+            .sesim-character .sesim-wing {
+                width: 18px;
+                height: 23px;
+                top: 15px;
+            }
+            
+            .sesim-character .sesim-wing.left { left: -10px; }
+            .sesim-character .sesim-wing.right { right: -10px; }
+            
+            .sesim-character .sesim-badge {
+                width: 13px;
+                height: 9px;
+                bottom: 10px;
+                font-size: 3px;
+            }
+            
+            .instructions {
+                margin-top: 8px;
+                padding: 8px 12px;
+                font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+                line-height: 1.4;
+            }
+            
+            .start-btn {
+                padding: 8px 35px;
+                font-size: clamp(1.1rem, 3vw, 1.4rem);
+                margin-top: 8px;
+            }
+            
+            .result-stats {
+                padding: 12px 20px;
+                margin: 8px 0;
+            }
+            
+            .stat-row {
+                font-size: clamp(0.85rem, 2.4vw, 1rem);
+                margin: 4px 0;
+            }
+            
+            .achievement-badge {
+                padding: 8px 18px;
+                font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+                margin-top: 8px;
+            }
+            
+            .result-title {
+                font-size: clamp(1.6rem, 5.5vw, 2.5rem);
+                margin-bottom: 5px;
+            }
+            
+            .sesim-character.small {
+                width: 50px;
+                height: 60px;
+                margin: 5px auto;
+            }
+            
+            .sesim-character.small .sesim-body {
+                width: 42px;
+                height: 42px;
+            }
+            
+            .sesim-character.small .sesim-face {
+                width: 30px;
+                height: 21px;
+                top: 6px;
+            }
+            
+            .sesim-character.small .sesim-eye {
+                width: 3.5px;
+                height: 4px;
+                top: 7px;
+            }
+            
+            .sesim-character.small .sesim-eye.left { left: 7px; }
+            .sesim-character.small .sesim-eye.right { right: 7px; }
+            
+            .sesim-character.small .sesim-mouth {
+                width: 5px;
+                height: 3px;
+                bottom: 5px;
+            }
+            
+            .sesim-character.small .sesim-cheek {
+                width: 5px;
+                height: 3px;
+                top: 12px;
+            }
+            
+            .sesim-character.small .sesim-cheek.left { left: 3px; }
+            .sesim-character.small .sesim-cheek.right { right: 3px; }
+            
+            .sesim-character.small .sesim-antenna {
+                width: 1.5px;
+                height: 12px;
+                top: -10px;
+            }
+            
+            .sesim-character.small .sesim-antenna.left { left: 14px; }
+            .sesim-character.small .sesim-antenna.right { right: 14px; }
+            
+            .sesim-character.small .sesim-antenna-ball {
+                width: 5.5px;
+                height: 5.5px;
+                top: -3px;
+                left: -2px;
+            }
+            
+            .sesim-character.small .sesim-wing {
+                width: 14px;
+                height: 18px;
+                top: 12px;
+            }
+            
+            .sesim-character.small .sesim-wing.left { left: -8px; }
+            .sesim-character.small .sesim-wing.right { right: -8px; }
+            
+            .sesim-character.small .sesim-badge {
+                width: 11px;
+                height: 8px;
+                bottom: 8px;
+                font-size: 2.5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 시작 화면 -->
+        <div id="start-screen">
+            <h1 class="game-title">🦸 납세 히어로</h1>
+            <p class="game-subtitle">세심이의 성실납세 대작전</p>
+            
+            <div class="sesim-character">
+                <div class="sesim-body">
+                    <div class="sesim-antenna left"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-antenna right"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-wing left"></div>
+                    <div class="sesim-wing right"></div>
+                    <div class="sesim-face">
+                        <div class="sesim-eye left"></div>
+                        <div class="sesim-eye right"></div>
+                        <div class="sesim-cheek left"></div>
+                        <div class="sesim-cheek right"></div>
+                        <div class="sesim-mouth"></div>
+                    </div>
+                    <div class="sesim-badge">세심</div>
+                </div>
+            </div>
+            
+            <button class="start-btn" onclick="startGame()">게임 시작!</button>
+            
+            <div class="instructions">
+                🎮 <strong>게임 방법</strong><br>
+                세심이를 좌우로 움직여 아이템을 모으세요!<br><br>
+                ✅ <strong>좋은 아이템</strong>: 💰성실납세, 🧾영수증, 🛡️절세<br>
+                ❌ <strong>나쁜 아이템</strong>: 💣탈세, 🚫조세회피, 📵탈루<br><br>
+                ⭐ <strong>특수 아이템</strong>에 닿으면 OX 퀴즈!<br>
+                🎯 사회 신뢰도를 유지하며 7개 퀴즈를 통과하세요!
+            </div>
+        </div>
+        
+        <!-- 게임 화면 -->
+        <div id="game-screen">
+            <canvas id="game-canvas"></canvas>
+            
+            <div id="hud">
+                <div class="hud-item">
+                    <span class="hud-icon">💰</span>
+                    <span id="score-display">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">🏛️</span>
+                    <span>신뢰도</span>
+                    <div id="trust-gauge-container">
+                        <div id="trust-gauge"></div>
+                    </div>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">✅</span>
+                    <span id="quiz-display">0/7</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">⏱️</span>
+                    <span id="time-display">60</span>
+                </div>
+            </div>
+            
+            <button id="pause-btn" onclick="togglePause()">일시정지</button>
+            
+            <!-- 일시 정지 오버레이 -->
+            <div id="pause-overlay">
+                <div class="pause-text">⏸️ 일시 정지</div>
+                <button class="resume-btn" onclick="togglePause()">계속하기</button>
+                <button class="resume-btn" onclick="restartFromPause()" style="margin-top:10px; background: linear-gradient(180deg, #FF9800 0%, #F57C00 100%); box-shadow: 0 4px 0 #E65100;">처음부터</button>
+            </div>
+        </div>
+        
+        <!-- OX 퀴즈 모달 -->
+        <div id="quiz-modal">
+            <div class="quiz-box">
+                <div class="quiz-header">
+                    <span class="quiz-icon" id="quiz-icon">📋</span>
+                    <h2 class="quiz-title" id="quiz-title">납세 퀴즈!</h2>
+                </div>
+                <p class="quiz-question" id="quiz-question">
+                    절세는 합법적인 방법으로 세금을 줄이는 것이다.
+                </p>
+                <div class="quiz-buttons" id="quiz-buttons">
+                    <button class="quiz-btn o-btn" onclick="answerQuiz(true)">O</button>
+                    <button class="quiz-btn x-btn" onclick="answerQuiz(false)">X</button>
+                </div>
+                <div class="quiz-result" id="quiz-result"></div>
+            </div>
+        </div>
+        
+        <!-- 결과 화면 -->
+        <div id="result-screen">
+            <h1 class="result-title" id="result-title">🎉 게임 클리어!</h1>
+            
+            <div class="sesim-character small">
+                <div class="sesim-body">
+                    <div class="sesim-antenna left"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-antenna right"><div class="sesim-antenna-ball"></div></div>
+                    <div class="sesim-wing left"></div>
+                    <div class="sesim-wing right"></div>
+                    <div class="sesim-face">
+                        <div class="sesim-eye left"></div>
+                        <div class="sesim-eye right"></div>
+                        <div class="sesim-cheek left"></div>
+                        <div class="sesim-cheek right"></div>
+                        <div class="sesim-mouth"></div>
+                    </div>
+                    <div class="sesim-badge">세심</div>
+                </div>
+            </div>
+            
+            <div class="result-stats">
+                <div class="stat-row">✅ 통과한 퀴즈: <span id="final-quiz">7</span>/7</div>
+                <div class="stat-row">💰 획득 점수: <span id="final-score">0</span>점</div>
+                <div class="stat-row">🏛️ 최종 신뢰도: <span id="final-trust">100</span>%</div>
+            </div>
+            
+            <div class="achievement-badge" id="achievement-badge">🏆 성실 납세자!</div>
+            
+            <div class="result-buttons">
+                <button class="start-btn" onclick="restartGame()">다시 하기</button>
+                <button class="end-btn" onclick="endGame()">게임 종료</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 게임 설정
+        const CONFIG = {
+            GAME_TIME: 90, // 90초
+            TRUST_MAX: 100,
+            TRUST_DECREASE_BAD: 15,
+            TRUST_INCREASE_GOOD: 5,
+            QUIZ_TRUST_BONUS: 10,
+            TOTAL_QUIZZES: 7,
+            ITEM_SPAWN_RATE: 0.03,
+            SPECIAL_SPAWN_RATE: 0.008
+        };
+
+        // 게임 상태
+        let gameState = {
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            trust: CONFIG.TRUST_MAX,
+            quizzesPassed: 0,
+            timeLeft: CONFIG.GAME_TIME,
+            currentQuiz: null,
+            usedQuizIndices: []
+        };
+
+        // 캔버스
+        let canvas, ctx;
+        let canvasWidth, canvasHeight;
+
+        // 게임 오브젝트
+        let player;
+        let items = [];
+        let particles = [];
+
+        // 타이머
+        let gameTimer;
+        let lastTime = 0;
+
+        // 좋은 아이템
+        const goodItems = [
+            { icon: '💰', name: '성실납세', points: 10, trustBonus: 3 },
+            { icon: '🧾', name: '영수증', points: 5, trustBonus: 2 },
+            { icon: '🛡️', name: '절세', points: 8, trustBonus: 2 },
+            { icon: '📝', name: '신고서', points: 7, trustBonus: 2 },
+            { icon: '✅', name: '납부확인', points: 6, trustBonus: 1 }
+        ];
+
+        // 나쁜 아이템
+        const badItems = [
+            { icon: '💣', name: '탈세', points: -15, trustPenalty: 15 },
+            { icon: '🚫', name: '조세회피', points: -10, trustPenalty: 10 },
+            { icon: '📵', name: '소득탈루', points: -12, trustPenalty: 12 },
+            { icon: '🎭', name: '허위신고', points: -10, trustPenalty: 10 },
+            { icon: '💸', name: '비자금', points: -8, trustPenalty: 8 }
+        ];
+
+        // 특수 아이템 (퀴즈 발동)
+        const specialItems = [
+            { icon: '⭐', name: '납세윤리' },
+            { icon: '🏛️', name: '공공서비스' },
+            { icon: '🤖', name: '로봇세' },
+            { icon: '🌍', name: '탄소세' },
+            { icon: '💻', name: '디지털세' },
+            { icon: '📊', name: '세금제도' },
+            { icon: '🎯', name: '시민의무' }
+        ];
+
+        // 퀴즈 데이터
+        const quizzes = [
+            {
+                icon: '📋',
+                title: '절세 vs 탈세',
+                question: '절세는 법이 허용하는 범위 내에서 합법적으로 세금을 줄이는 것이다.',
+                answer: true,
+                explanation: '절세는 합법적인 방법이며, 탈세는 법을 어기는 범죄입니다.'
+            },
+            {
+                icon: '💣',
+                title: '탈세 / 절세 / 조세회피',
+                question: '소득을 숨기고 신고하지 않는 것은 절세에 해당한다.',
+                answer: false,
+                explanation: '소득을 숨기거나 허위 신고 등 법을 어기고 세금을 줄이거나 내지 않는 행위는 탈세이며, 명백한 범법 행위입니다.'
+            },
+            {
+                icon: '🏛️',
+                title: '공공 서비스',
+                question: '세금이 부족해지면 학교, 병원, 복지 등 공공 서비스의 질이 떨어질 수 있다.',
+                answer: true,
+                explanation: '세금은 공공 서비스의 재원이므로, 부족하면 서비스 질이 하락합니다.'
+            },
+            {
+                icon: '🤖',
+                title: '로봇세',
+                question: '로봇세는 로봇이 사람의 일자리를 대체할 때 발생하는 세수 감소를 보충하기 위한 세금이다.',
+                answer: true,
+                explanation: '로봇세는 자동화로 인한 소득세 감소를 보충하기 위해 논의되고 있습니다.'
+            },
+            {
+                icon: '🌍',
+                title: '탄소세',
+                question: '탄소세는 이산화탄소를 많이 배출하는 기업에 부과하여 환경 보호를 유도한다.',
+                answer: true,
+                explanation: '탄소세는 오염을 줄이고 친환경 기술 개발을 유도하기 위한 세금입니다.'
+            },
+            {
+                icon: '💻',
+                title: '디지털세',
+                question: '해외 디지털 플랫폼 기업은 국내에서 수익을 올려도 세금을 낼 필요가 없다.',
+                answer: false,
+                explanation: '디지털세는 다국적 기업의 공정한 과세를 위해 도입이 논의되고 있습니다.'
+            },
+            {
+                icon: '⚖️',
+                title: '납세의 의무',
+                question: '헌법에 납세의 의무가 명시된 이유는 세금이 우리 공동체를 유지하는 데 필수적이기 때문이다.',
+                answer: true,
+                explanation: '세금은 공공 서비스와 사회 안전망을 위한 필수 재원입니다.'
+            }
+        ];
+
+        // 초기화
+        function init() {
+            canvas = document.getElementById('game-canvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // 입력 이벤트
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+            canvas.addEventListener('touchstart', handleTouchMove, { passive: false });
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvasWidth = canvas.width;
+            canvasHeight = canvas.height;
+        }
+
+        function handleMouseMove(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left;
+            clampPlayer();
+        }
+
+        function handleTouchMove(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            player.x = touch.clientX - rect.left;
+            clampPlayer();
+        }
+
+        function clampPlayer() {
+            if (player.x < player.width / 2) player.x = player.width / 2;
+            if (player.x > canvasWidth - player.width / 2) player.x = canvasWidth - player.width / 2;
+        }
+
+        function createPlayer() {
+            player = {
+                x: canvasWidth / 2,
+                y: canvasHeight - 100,
+                width: 60,
+                height: 70,
+                wingAngle: 0
+            };
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('active');
+            
+            resetGameState();
+            createPlayer();
+            
+            gameState.isPlaying = true;
+            lastTime = Date.now();
+            
+            // 타이머 시작
+            gameTimer = setInterval(() => {
+                if (!gameState.isPaused && gameState.isPlaying) {
+                    gameState.timeLeft--;
+                    updateHUD();
+                    
+                    if (gameState.timeLeft <= 0) {
+                        checkGameEnd();
+                    }
+                }
+            }, 1000);
+            
+            updateHUD();
+            gameLoop();
+        }
+
+        function resetGameState() {
+            gameState.score = 0;
+            gameState.trust = CONFIG.TRUST_MAX;
+            gameState.quizzesPassed = 0;
+            gameState.timeLeft = CONFIG.GAME_TIME;
+            gameState.isPaused = false;
+            gameState.currentQuiz = null;
+            gameState.usedQuizIndices = [];
+            items = [];
+            particles = [];
+        }
+
+        function restartGame() {
+            // 기존 타이머 정리
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+            
+            document.getElementById('result-screen').classList.remove('active', 'win', 'lose');
+            document.getElementById('game-screen').classList.add('active');
+            
+            resetGameState();
+            createPlayer();
+            
+            gameState.isPlaying = true;
+            lastTime = Date.now();
+            
+            gameTimer = setInterval(() => {
+                if (!gameState.isPaused && gameState.isPlaying) {
+                    gameState.timeLeft--;
+                    updateHUD();
+                    
+                    if (gameState.timeLeft <= 0) {
+                        checkGameEnd();
+                    }
+                }
+            }, 1000);
+            
+            updateHUD();
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+            
+            if (!gameState.isPaused) {
+                update();
+            }
+            draw();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            // 아이템 생성
+            spawnItems();
+            
+            // 아이템 업데이트
+            items.forEach((item, index) => {
+                item.y += item.speed;
+                item.rotation += 0.05;
+                
+                // 플레이어와 충돌 체크
+                if (checkCollision(player, item)) {
+                    handleItemCollision(item);
+                    items.splice(index, 1);
+                    return;
+                }
+                
+                // 화면 밖으로 나가면 제거
+                if (item.y > canvasHeight + 50) {
+                    items.splice(index, 1);
+                }
+            });
+            
+            // 파티클 업데이트
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1;
+                p.life--;
+                return p.life > 0;
+            });
+            
+            // 플레이어 애니메이션
+            player.wingAngle += 0.3;
+            
+            // 신뢰도 체크
+            if (gameState.trust <= 0) {
+                gameOver(false);
+            }
+        }
+
+        function spawnItems() {
+            // 특수 아이템 (퀴즈) - 퀴즈를 아직 다 통과하지 않았을 때만
+            if (Math.random() < CONFIG.SPECIAL_SPAWN_RATE && gameState.quizzesPassed < CONFIG.TOTAL_QUIZZES) {
+                const special = specialItems[Math.floor(Math.random() * specialItems.length)];
+                items.push({
+                    x: Math.random() * (canvasWidth - 60) + 30,
+                    y: -40,
+                    width: 50,
+                    height: 50,
+                    speed: 2 + Math.random() * 1.5,
+                    rotation: 0,
+                    type: 'special',
+                    icon: special.icon,
+                    name: special.name,
+                    glow: 0
+                });
+            }
+            
+            // 일반 아이템
+            if (Math.random() < CONFIG.ITEM_SPAWN_RATE) {
+                const isGood = Math.random() > 0.4; // 60% 좋은 아이템
+                const itemList = isGood ? goodItems : badItems;
+                const item = itemList[Math.floor(Math.random() * itemList.length)];
+                
+                items.push({
+                    x: Math.random() * (canvasWidth - 60) + 30,
+                    y: -40,
+                    width: 40,
+                    height: 40,
+                    speed: 3 + Math.random() * 2,
+                    rotation: 0,
+                    type: isGood ? 'good' : 'bad',
+                    ...item
+                });
+            }
+        }
+
+        function checkCollision(player, item) {
+            const px = player.x;
+            const py = player.y;
+            const pw = player.width;
+            const ph = player.height;
+            
+            return item.x > px - pw/2 - item.width/2 &&
+                   item.x < px + pw/2 + item.width/2 &&
+                   item.y > py - ph/2 - item.height/2 &&
+                   item.y < py + ph/2 + item.height/2;
+        }
+
+        function handleItemCollision(item) {
+            if (item.type === 'special') {
+                // 퀴즈 발동
+                showQuiz();
+                createParticles(item.x, item.y, '#FFD700', 15);
+            } else if (item.type === 'good') {
+                // 좋은 아이템
+                gameState.score += item.points;
+                gameState.trust = Math.min(CONFIG.TRUST_MAX, gameState.trust + item.trustBonus);
+                createParticles(item.x, item.y, '#4CAF50', 10);
+            } else {
+                // 나쁜 아이템
+                gameState.score += item.points;
+                gameState.trust = Math.max(0, gameState.trust - item.trustPenalty);
+                createParticles(item.x, item.y, '#F44336', 10);
+            }
+            
+            updateHUD();
+        }
+
+        function showQuiz() {
+            gameState.isPaused = true;
+            
+            // 사용하지 않은 퀴즈 선택
+            let quizIndex;
+            const availableQuizzes = [];
+            for (let i = 0; i < quizzes.length; i++) {
+                if (!gameState.usedQuizIndices.includes(i)) {
+                    availableQuizzes.push(i);
+                }
+            }
+            
+            if (availableQuizzes.length > 0) {
+                quizIndex = availableQuizzes[Math.floor(Math.random() * availableQuizzes.length)];
+            } else {
+                quizIndex = Math.floor(Math.random() * quizzes.length);
+            }
+            
+            const quiz = quizzes[quizIndex];
+            gameState.currentQuiz = { ...quiz, index: quizIndex };
+            
+            document.getElementById('quiz-icon').textContent = quiz.icon;
+            document.getElementById('quiz-title').textContent = quiz.title;
+            document.getElementById('quiz-question').textContent = quiz.question;
+            document.getElementById('quiz-result').className = 'quiz-result';
+            document.getElementById('quiz-result').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+            
+            document.getElementById('quiz-modal').classList.add('active');
+        }
+
+        function answerQuiz(answer) {
+            const quiz = gameState.currentQuiz;
+            const resultDiv = document.getElementById('quiz-result');
+            const buttonsDiv = document.getElementById('quiz-buttons');
+            
+            if (answer === quiz.answer) {
+                // 정답
+                resultDiv.className = 'quiz-result correct';
+                resultDiv.innerHTML = `
+                    <p>🎉 정답이에요!</p>
+                    <p style="margin-top: 6px; font-weight: normal; font-size: 0.9em;">${quiz.explanation}</p>
+                    <button class="result-btn continue" onclick="closeQuiz(true)">계속하기 (+${CONFIG.QUIZ_TRUST_BONUS}% 신뢰도)</button>
+                `;
+                buttonsDiv.style.display = 'none';
+            } else {
+                // 오답
+                resultDiv.className = 'quiz-result wrong';
+                resultDiv.innerHTML = `
+                    <p>❌ 틀렸어요!</p>
+                    <p style="margin-top: 6px; font-weight: normal; font-size: 0.9em;">다시 생각해보세요!</p>
+                    <button class="result-btn retry" onclick="retryQuiz()">다시 풀기</button>
+                `;
+                buttonsDiv.style.display = 'none';
+            }
+        }
+
+        function retryQuiz() {
+            document.getElementById('quiz-result').className = 'quiz-result';
+            document.getElementById('quiz-result').innerHTML = '';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+        }
+
+        function closeQuiz(success) {
+            document.getElementById('quiz-modal').classList.remove('active');
+            
+            if (success) {
+                gameState.quizzesPassed++;
+                gameState.usedQuizIndices.push(gameState.currentQuiz.index);
+                gameState.trust = Math.min(CONFIG.TRUST_MAX, gameState.trust + CONFIG.QUIZ_TRUST_BONUS);
+                gameState.score += 50;
+                updateHUD();
+                
+                // 모든 퀴즈 통과 체크
+                if (gameState.quizzesPassed >= CONFIG.TOTAL_QUIZZES) {
+                    setTimeout(() => gameOver(true), 500);
+                    return;
+                }
+            }
+            
+            gameState.isPaused = false;
+            gameState.currentQuiz = null;
+        }
+        
+        function togglePause() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.isPaused = !gameState.isPaused;
+            const pauseOverlay = document.getElementById('pause-overlay');
+            const pauseBtn = document.getElementById('pause-btn');
+            
+            if (gameState.isPaused) {
+                pauseOverlay.classList.add('active');
+                pauseBtn.textContent = '계속하기';
+            } else {
+                pauseOverlay.classList.remove('active');
+                pauseBtn.textContent = '일시정지';
+            }
+        }
+
+        function restartFromPause() {
+            gameState.isPaused = false;
+            gameState.isPlaying = false;
+            document.getElementById('pause-overlay').classList.remove('active');
+            document.getElementById('pause-btn').textContent = '일시정지';
+            if (gameTimer) {
+                clearInterval(gameTimer);
+            }
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+        
+        function endGame() {
+            window.close();
+            // window.close()가 작동하지 않는 경우를 위한 fallback
+            if (!window.closed) {
+                alert('브라우저 설정에 따라 탭을 자동으로 닫을 수 없습니다.\n탭을 직접 닫아주세요.');
+            }
+        }
+
+        function checkGameEnd() {
+            if (gameState.quizzesPassed >= CONFIG.TOTAL_QUIZZES) {
+                gameOver(true);
+            } else {
+                gameOver(false);
+            }
+        }
+
+        function gameOver(isWin) {
+            gameState.isPlaying = false;
+            clearInterval(gameTimer);
+            
+            document.getElementById('game-screen').classList.remove('active');
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.add('active');
+            resultScreen.classList.add(isWin ? 'win' : 'lose');
+            
+            document.getElementById('result-title').textContent = isWin ? '🎉 게임 클리어!' : '😢 게임 오버';
+            document.getElementById('final-quiz').textContent = gameState.quizzesPassed;
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-trust').textContent = gameState.trust;
+            
+            if (isWin) {
+                document.getElementById('achievement-badge').textContent = '🏆 성실 납세자!';
+            } else if (gameState.trust <= 0) {
+                document.getElementById('achievement-badge').textContent = '신뢰도가 0이 되었습니다...';
+            } else {
+                document.getElementById('achievement-badge').textContent = '시간 내에 퀴즈를 통과하지 못했습니다...';
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').textContent = gameState.score;
+            document.getElementById('trust-gauge').style.width = `${gameState.trust}%`;
+            document.getElementById('quiz-display').textContent = `${gameState.quizzesPassed}/${CONFIG.TOTAL_QUIZZES}`;
+            document.getElementById('time-display').textContent = gameState.timeLeft;
+            
+            // 신뢰도에 따른 게이지 색상 변경
+            const trustGauge = document.getElementById('trust-gauge');
+            if (gameState.trust > 60) {
+                trustGauge.style.background = 'linear-gradient(90deg, #4CAF50, #8BC34A)';
+            } else if (gameState.trust > 30) {
+                trustGauge.style.background = 'linear-gradient(90deg, #FF9800, #FFC107)';
+            } else {
+                trustGauge.style.background = 'linear-gradient(90deg, #F44336, #FF5722)';
+            }
+        }
+
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 2,
+                    color: color,
+                    size: Math.random() * 6 + 3,
+                    life: 40
+                });
+            }
+        }
+
+        function draw() {
+            // 배경
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvasHeight);
+            gradient.addColorStop(0, '#1a237e');
+            gradient.addColorStop(0.5, '#283593');
+            gradient.addColorStop(1, '#3949ab');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 배경 별
+            drawStars();
+            
+            // 아이템
+            items.forEach(item => drawItem(item));
+            
+            // 파티클
+            particles.forEach(p => {
+                ctx.globalAlpha = p.life / 40;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            
+            // 플레이어 (세심이)
+            drawPlayer();
+        }
+
+        function drawStars() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            for (let i = 0; i < 50; i++) {
+                const x = (i * 73 + Date.now() * 0.01) % canvasWidth;
+                const y = (i * 47) % (canvasHeight - 100);
+                const size = (i % 3) + 1;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawItem(item) {
+            ctx.save();
+            ctx.translate(item.x, item.y);
+            
+            if (item.type === 'special') {
+                // 특수 아이템 글로우 효과
+                const glowSize = 30 + Math.sin(Date.now() * 0.005) * 10;
+                const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, glowSize);
+                gradient.addColorStop(0, 'rgba(255, 215, 0, 0.6)');
+                gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, glowSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 아이템 배경
+            if (item.type === 'good') {
+                ctx.fillStyle = 'rgba(76, 175, 80, 0.3)';
+            } else if (item.type === 'bad') {
+                ctx.fillStyle = 'rgba(244, 67, 54, 0.3)';
+            } else {
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+            }
+            ctx.beginPath();
+            ctx.arc(0, 0, item.width / 2 + 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 아이콘
+            ctx.font = `${item.width * 0.8}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.icon, 0, 0);
+            
+            ctx.restore();
+        }
+
+        function drawPlayer() {
+            const x = player.x;
+            const y = player.y;
+            
+            ctx.save();
+            
+            // 날개
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.strokeStyle = 'rgba(150, 150, 150, 0.5)';
+            ctx.lineWidth = 2;
+            
+            const wingOffset = Math.sin(player.wingAngle) * 3;
+            
+            // 왼쪽 날개
+            ctx.beginPath();
+            ctx.ellipse(x - 35, y - 5 + wingOffset, 20, 28, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // 오른쪽 날개
+            ctx.beginPath();
+            ctx.ellipse(x + 35, y - 5 - wingOffset, 20, 28, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 몸통
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fillStyle = '#4A3728';
+            ctx.fill();
+            ctx.strokeStyle = '#3D2E1F';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // 노란 배
+            ctx.beginPath();
+            ctx.arc(x, y + 10, 24, 0.2, Math.PI - 0.2);
+            ctx.fillStyle = '#FFD93D';
+            ctx.fill();
+
+            // 얼굴
+            ctx.beginPath();
+            ctx.ellipse(x, y - 8, 22, 18, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFE4B5';
+            ctx.fill();
+
+            // 눈
+            ctx.fillStyle = '#2D2D2D';
+            ctx.beginPath();
+            ctx.ellipse(x - 9, y - 10, 4, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 9, y - 10, 4, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 볼터치
+            ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
+            ctx.beginPath();
+            ctx.ellipse(x - 16, y - 4, 5, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 16, y - 4, 5, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 입
+            ctx.fillStyle = '#E85A4F';
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI);
+            ctx.fill();
+
+            // 더듬이
+            ctx.strokeStyle = '#4A3728';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.moveTo(x - 10, y - 25);
+            ctx.lineTo(x - 15, y - 42);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 25);
+            ctx.lineTo(x + 15, y - 42);
+            ctx.stroke();
+
+            // 더듬이 끝 공
+            ctx.fillStyle = '#FFD93D';
+            ctx.strokeStyle = '#4A3728';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x - 15, y - 44, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x + 15, y - 44, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // 시작
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
