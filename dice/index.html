@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 주사위 굴리기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Black+Han+Sans&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #86b8b1;
+    --card: #ffffff;
+    --title: #3d6b64;
+    --btn-roll: #4a5568;
+    --btn-stop: #e8853a;
+    --btn-again: #4a5568;
+    --btn-end: #c53030;
+    --text-muted: #6b8e87;
+    --shadow: rgba(0,0,0,0.15);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100vw; height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: relative;
+    user-select: none;
+  }
+
+  /* ── Title ── */
+  .title {
+    font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    color: var(--title);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: clamp(16px, 3vh, 36px);
+  }
+  .title-icon {
+    font-size: clamp(24px, 4vw, 40px);
+  }
+
+  /* ── Dice Area ── */
+  .dice-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(20px, 4vw, 60px);
+    margin-bottom: clamp(16px, 3vh, 32px);
+  }
+
+  .dice-wrapper {
+    perspective: 600px;
+  }
+
+  .dice {
+    width: clamp(120px, 22vw, 260px);
+    height: clamp(120px, 22vw, 260px);
+    background: var(--card);
+    border-radius: clamp(16px, 3vw, 28px);
+    box-shadow: 6px 8px 20px var(--shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.15s;
+  }
+
+  .dice.rolling {
+    animation: diceShake 0.12s infinite alternate;
+  }
+
+  .dice.tilt-left {
+    transform: rotate(-6deg);
+  }
+  .dice.tilt-right {
+    transform: rotate(5deg);
+  }
+
+  @keyframes diceShake {
+    0%   { transform: rotate(-8deg) scale(1.02); }
+    25%  { transform: rotate(6deg) scale(0.98); }
+    50%  { transform: rotate(-5deg) scale(1.01); }
+    75%  { transform: rotate(7deg) scale(0.99); }
+    100% { transform: rotate(-6deg) scale(1.02); }
+  }
+
+  /* ── Dice Face (SVG dots) ── */
+  .dice-face {
+    width: 80%; height: 80%;
+    position: relative;
+  }
+
+  .dot {
+    position: absolute;
+    width: 22%;
+    height: 22%;
+    background: #1a1a1a;
+    border-radius: 50%;
+  }
+
+  /* Dot positions */
+  .pos-tl { top: 8%;  left: 8%;  }
+  .pos-tc { top: 8%;  left: 39%; }
+  .pos-tr { top: 8%;  right: 8%; }
+  .pos-ml { top: 39%; left: 8%;  }
+  .pos-mc { top: 39%; left: 39%; }
+  .pos-mr { top: 39%; right: 8%; }
+  .pos-bl { bottom: 8%; left: 8%;  }
+  .pos-bc { bottom: 8%; left: 39%; }
+  .pos-br { bottom: 8%; right: 8%; }
+
+  /* Question mark for initial state */
+  .question-mark {
+    font-size: clamp(48px, 10vw, 120px);
+    color: #c0c0c0;
+    font-weight: 300;
+  }
+
+  /* ── Status & Result ── */
+  .status-text {
+    font-size: clamp(18px, 3vw, 32px);
+    color: var(--title);
+    font-weight: 700;
+    height: clamp(28px, 4vh, 44px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .result-text {
+    font-size: clamp(24px, 4vw, 44px);
+    color: var(--title);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+  }
+
+  .hint-text {
+    font-size: clamp(12px, 2vw, 18px);
+    color: #c53030;
+    font-weight: 700;
+    height: clamp(20px, 3vh, 28px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sub-text {
+    font-size: clamp(12px, 1.8vw, 16px);
+    color: var(--text-muted);
+    height: clamp(20px, 3vh, 28px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Buttons ── */
+  .btn-row {
+    display: flex;
+    gap: clamp(12px, 3vw, 28px);
+    margin-top: clamp(8px, 1.5vh, 16px);
+  }
+
+  .btn {
+    min-width: clamp(140px, 22vw, 260px);
+    padding: clamp(14px, 2vh, 22px) clamp(24px, 4vw, 48px);
+    border: none;
+    border-radius: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: clamp(16px, 2.5vw, 26px);
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  }
+  .btn:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+
+  .btn-roll    { background: var(--btn-roll); }
+  .btn-stop    { background: var(--btn-stop); }
+  .btn-again   { background: var(--btn-again); }
+  .btn-end     { background: var(--btn-end); }
+
+  .btn-icon {
+    font-size: 1.1em;
+  }
+
+  /* ── Timer bar ── */
+  .timer-bar-container {
+    width: clamp(200px, 30vw, 400px);
+    height: 6px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    background: #c53030;
+    border-radius: 3px;
+    transition: width 0.1s linear;
+  }
+
+  /* ── Fullscreen button ── */
+  .fullscreen-btn {
+    position: fixed;
+    top: 12px; right: 12px;
+    width: 40px; height: 40px;
+    background: rgba(0,0,0,0.25);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: background 0.2s;
+  }
+  .fullscreen-btn:hover {
+    background: rgba(0,0,0,0.45);
+  }
+
+  /* ── End screen ── */
+  .end-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .end-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .end-card {
+    background: white;
+    border-radius: 24px;
+    padding: clamp(32px, 5vw, 60px);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: scale(0.8);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .end-overlay.show .end-card {
+    transform: scale(1);
+  }
+  .end-card h2 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(24px, 4vw, 40px);
+    color: var(--title);
+    margin-bottom: 12px;
+  }
+  .end-card p {
+    font-size: clamp(14px, 2vw, 18px);
+    color: #666;
+    margin-bottom: 24px;
+  }
+  .end-card .btn {
+    margin: 0 auto;
+  }
+
+  /* ── Result pop animation ── */
+  @keyframes popIn {
+    0%   { transform: scale(0.5); opacity: 0; }
+    70%  { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .pop-in {
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── Dice settle animation ── */
+  @keyframes settleLeft {
+    0%   { transform: rotate(-15deg) scale(1.05); }
+    60%  { transform: rotate(3deg) scale(0.98); }
+    100% { transform: rotate(-3deg) scale(1); }
+  }
+  @keyframes settleRight {
+    0%   { transform: rotate(12deg) scale(1.05); }
+    60%  { transform: rotate(-4deg) scale(0.98); }
+    100% { transform: rotate(3deg) scale(1); }
+  }
+  .settle-left  { animation: settleLeft 0.5s ease-out forwards; }
+  .settle-right { animation: settleRight 0.5s ease-out forwards; }
+</style>
+</head>
+<body>
+
+<button class="fullscreen-btn" onclick="toggleFullscreen()" title="전체화면">⛶</button>
+
+<div class="container" id="app">
+  <!-- Title -->
+  <div class="title">
+    <span class="title-icon">🎲</span>
+    주사위 굴리기
+  </div>
+
+  <!-- Dice -->
+  <div class="dice-area">
+    <div class="dice-wrapper">
+      <div class="dice" id="dice1">
+        <span class="question-mark">?</span>
+      </div>
+    </div>
+    <div class="dice-wrapper">
+      <div class="dice" id="dice2">
+        <span class="question-mark">?</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-text" id="statusText"></div>
+  <div class="hint-text" id="hintText"></div>
+  <div class="sub-text" id="subText">버튼을 클릭하면 주사위가 굴려집니다</div>
+
+  <!-- Timer bar (hidden initially) -->
+  <div class="timer-bar-container" id="timerBarContainer" style="visibility:hidden">
+    <div class="timer-bar" id="timerBar" style="width:100%"></div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row" id="btnRow">
+    <button class="btn btn-roll" id="btnRoll" onclick="startRolling()">
+      <span class="btn-icon">🔄</span> 굴리기
+    </button>
+    <button class="btn btn-stop" id="btnStop" onclick="stopRolling()" style="display:none">
+      <span class="btn-icon">⏹</span> 멈추기!
+    </button>
+    <button class="btn btn-again" id="btnAgain" onclick="rollAgain()" style="display:none">
+      다시 굴리기
+    </button>
+    <button class="btn btn-end" id="btnEnd" onclick="endGame()" style="display:none">
+      끝내기
+    </button>
+  </div>
+</div>
+
+<!-- End overlay -->
+<div class="end-overlay" id="endOverlay">
+  <div class="end-card">
+    <h2>🎲 주사위 굴리기 종료</h2>
+    <p>다시 시작하려면 아래 버튼을 클릭하세요</p>
+    <button class="btn btn-roll" onclick="restartGame()">
+      <span class="btn-icon">🔄</span> 다시 시작
+    </button>
+  </div>
+</div>
+
+<script>
+  // ── Dot layout configs ──
+  const DOT_LAYOUTS = {
+    1: ['mc'],
+    2: ['tr', 'bl'],
+    3: ['tr', 'mc', 'bl'],
+    4: ['tl', 'tr', 'bl', 'br'],
+    5: ['tl', 'tr', 'mc', 'bl', 'br'],
+    6: ['tl', 'tr', 'ml', 'mr', 'bl', 'br']
+  };
+
+  let rolling = false;
+  let rollInterval = null;
+  let autoStopTimeout = null;
+  let timerInterval = null;
+  let dotAnimIndex = 0;
+
+  const dice1El = document.getElementById('dice1');
+  const dice2El = document.getElementById('dice2');
+  const statusText = document.getElementById('statusText');
+  const hintText = document.getElementById('hintText');
+  const subText = document.getElementById('subText');
+  const btnRoll = document.getElementById('btnRoll');
+  const btnStop = document.getElementById('btnStop');
+  const btnAgain = document.getElementById('btnAgain');
+  const btnEnd = document.getElementById('btnEnd');
+  const timerBarContainer = document.getElementById('timerBarContainer');
+  const timerBar = document.getElementById('timerBar');
+
+  function renderDice(el, value) {
+    const dots = DOT_LAYOUTS[value];
+    el.innerHTML = '';
+    const face = document.createElement('div');
+    face.className = 'dice-face';
+    dots.forEach(pos => {
+      const dot = document.createElement('div');
+      dot.className = `dot pos-${pos}`;
+      face.appendChild(dot);
+    });
+    el.appendChild(face);
+  }
+
+  function renderQuestion(el) {
+    el.innerHTML = '<span class="question-mark">?</span>';
+  }
+
+  function randomDice() {
+    return Math.floor(Math.random() * 6) + 1;
+  }
+
+  // ── Rolling dots text animation ──
+  const dotPatterns = ['.', '..', '...'];
+
+  function startRolling() {
+    rolling = true;
+    dotAnimIndex = 0;
+
+    // UI switches
+    btnRoll.style.display = 'none';
+    btnStop.style.display = 'flex';
+    btnAgain.style.display = 'none';
+    btnEnd.style.display = 'none';
+    subText.textContent = '';
+    hintText.textContent = '5초 이내에 버튼을 클릭하세요!';
+
+    // Start timer bar
+    timerBarContainer.style.visibility = 'visible';
+    timerBar.style.width = '100%';
+    const timerStart = Date.now();
+    const timerDuration = 5000;
+    timerInterval = setInterval(() => {
+      const elapsed = Date.now() - timerStart;
+      const pct = Math.max(0, 1 - elapsed / timerDuration) * 100;
+      timerBar.style.width = pct + '%';
+    }, 50);
+
+    // Roll animation
+    dice1El.classList.add('rolling');
+    dice2El.classList.add('rolling');
+    dice1El.classList.remove('tilt-left', 'settle-left');
+    dice2El.classList.remove('tilt-right', 'settle-right');
+
+    rollInterval = setInterval(() => {
+      renderDice(dice1El, randomDice());
+      renderDice(dice2El, randomDice());
+      dotAnimIndex = (dotAnimIndex + 1) % 3;
+      statusText.textContent = '굴리는 중' + dotPatterns[dotAnimIndex];
+    }, 120);
+
+    // Auto-stop after 5 seconds
+    autoStopTimeout = setTimeout(() => {
+      if (rolling) stopRolling();
+    }, 5000);
+  }
+
+  function stopRolling() {
+    if (!rolling) return;
+    rolling = false;
+
+    clearInterval(rollInterval);
+    clearTimeout(autoStopTimeout);
+    clearInterval(timerInterval);
+
+    // Final values
+    const v1 = randomDice();
+    const v2 = randomDice();
+
+    dice1El.classList.remove('rolling');
+    dice2El.classList.remove('rolling');
+
+    // Settle animation
+    dice1El.classList.add('settle-left');
+    dice2El.classList.add('settle-right');
+
+    renderDice(dice1El, v1);
+    renderDice(dice2El, v2);
+
+    // Result
+    const sum = v1 + v2;
+    statusText.innerHTML = '';
+    hintText.textContent = '';
+    timerBarContainer.style.visibility = 'hidden';
+
+    // Show result with pop animation
+    const resultEl = document.createElement('div');
+    resultEl.className = 'result-text pop-in';
+    resultEl.textContent = `${v1}  +  ${v2}  =  ${sum}`;
+    statusText.appendChild(resultEl);
+
+    // UI switches
+    btnStop.style.display = 'none';
+    btnAgain.style.display = 'flex';
+    btnEnd.style.display = 'flex';
+  }
+
+  function rollAgain() {
+    // Reset dice tilt
+    dice1El.classList.remove('settle-left', 'tilt-left');
+    dice2El.classList.remove('settle-right', 'tilt-right');
+    startRolling();
+  }
+
+  function endGame() {
+    window.close();
+    // window.close()는 window.open()으로 열린 탭에서만 동작합니다.
+    // 직접 주소를 입력해 연 경우 fallback으로 빈 페이지로 이동합니다.
+    setTimeout(() => {
+      window.location.href = 'about:blank';
+    }, 300);
+  }
+
+  function restartGame() {
+    document.getElementById('endOverlay').classList.remove('show');
+
+    // Full reset
+    renderQuestion(dice1El);
+    renderQuestion(dice2El);
+    dice1El.classList.remove('rolling', 'settle-left', 'tilt-left');
+    dice2El.classList.remove('rolling', 'settle-right', 'tilt-right');
+    statusText.textContent = '';
+    hintText.textContent = '';
+    subText.textContent = '버튼을 클릭하면 주사위가 굴려집니다';
+    timerBarContainer.style.visibility = 'hidden';
+
+    btnRoll.style.display = 'flex';
+    btnStop.style.display = 'none';
+    btnAgain.style.display = 'none';
+    btnEnd.style.display = 'none';
+  }
+
+  // ── Fullscreen ──
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // ── Keyboard support ──
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.preventDefault();
+      if (document.getElementById('endOverlay').classList.contains('show')) {
+        restartGame();
+      } else if (rolling) {
+        stopRolling();
+      } else if (btnRoll.style.display !== 'none') {
+        startRolling();
+      } else if (btnAgain.style.display !== 'none') {
+        rollAgain();
+      }
+    }
+    if (e.code === 'Escape' && document.getElementById('endOverlay').classList.contains('show')) {
+      restartGame();
+    }
+    if (e.code === 'KeyF') {
+      toggleFullscreen();
+    }
+  });
+</script>
+</body>
+</html>
